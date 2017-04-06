@@ -1,41 +1,43 @@
 package com.kokuva;
 
 import android.Manifest.permission;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnTouchListener;
-import android.widget.ImageView;
-
+import android.util.Patterns;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.kokuva.adapter.ViewPagerAdapter;
-import com.kokuva.model.Profile;
-import com.kokuva.model.UserLocation;
+import com.kokuva.model.User;
 
-public class MainActivity extends BaseActivity implements View.OnClickListener {
+import java.util.regex.Pattern;
 
-    private static final int RC_SIGN_IN = 100;
-    private static final int RC_PROFILE = 200;
+public class MainActivity extends BaseActivity {
+
     private DatabaseReference myRef;
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
-    private Profile profile;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,84 +45,77 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         KokuvaApp.getInstance().setContext(this);
         myRef = FirebaseDatabase.getInstance().getReference();
-        FirebaseAuth auth = FirebaseAuth.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(null);
-
-        if (auth.getCurrentUser() == null) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivityForResult(intent, RC_SIGN_IN);
-        } else {
-            getUserFromFirebase(auth.getCurrentUser().getUid());
-            getLocation(auth.getCurrentUser().getUid());
-        }
-    }
-
-    private void setupViewPager() {
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-        viewPager.setOnTouchListener(new OnTouchListener()
-        {
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event)
-            {
-                return true;
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
             }
-        });
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
+        };
 
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new FragmentMain(), null);
-        adapter.addFragment(new FragmentProfile(), null);
-        adapter.addFragment(new FragmentMessage(), null);
-        adapter.addFragment(new FragmentPreferences(), null);
-        viewPager.setAdapter(adapter);
-        int array[] = {R.drawable.ic_action_home,
-                R.drawable.ic_action_user,
-                R.drawable.ic_action_dialog,
-                R.drawable.ic_action_gear};
-        for (int i = 0; i < tabLayout.getTabCount(); i++) {
-            ImageView imageView = new ImageView(this);
-            imageView.setImageResource(array[i]);
-            tabLayout.getTabAt(i).setCustomView(imageView);
+        if (mAuth.getCurrentUser() == null) {
+            createUser();
+        } else {
+            getUserFromFirebase(mAuth.getCurrentUser().getUid());
         }
-        //tabLayout.getTabAt(0).setIcon(R.drawable.ic_action_home);
-        //tabLayout.getTabAt(1).setIcon(R.drawable.ic_action_user);
-        //tabLayout.getTabAt(2).setIcon(R.drawable.ic_action_dialog);
-        //tabLayout.getTabAt(3).setIcon(R.drawable.ic_action_gear);
     }
 
+    private void createUser(){
+        User user = new User();
+        TelephonyManager t = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
+        user.setPhone(t.getLine1Number());
 
-    private void getLocation(final String uid) {
+        Pattern email = Patterns.EMAIL_ADDRESS;
+        Account[] accounts = AccountManager.get(this).getAccounts();
+        for (Account account : accounts) {
+            if (email.matcher(account.name).matches()) {
+                user.setEmail(account.name);
+            }
+        }
+
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wInfo = wifiManager.getConnectionInfo();
+        user.setMacaddress(wInfo.getMacAddress());
+
+        user.setEmail("alexandrefett@gmail.com");
+        user.setMacaddress("00:00:00:00:00:00");
+        user.setPhone("21983297979");
+        createAccount(user);
+
+    }
+
+    private void getLocation() {
+
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(final Location location) {
                 Log.d(TAG, "onLocationChanged: " + location.getLatitude());
-                UserLocation l = new UserLocation(location.getLatitude(), location.getLongitude());
-                updateLocation(uid, l);
+                KokuvaApp.getInstance().getUser().setLocation(location.getLatitude(), location.getLongitude());
+                updateLocation();
             }
 
             @Override
             public void onStatusChanged(String s, int i, Bundle bundle) {
                 Log.d(TAG, "onStatusChanged: " + s);
-
             }
 
             @Override
             public void onProviderEnabled(String s) {
                 Log.d(TAG, "onProviderEnabled: " + s);
-
             }
 
             @Override
             public void onProviderDisabled(String s) {
                 Log.d(TAG, "onProviderDisabled: " + s);
-
             }
         };
 
@@ -131,15 +126,28 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1, 1, mLocationListener);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mLocationManager.removeUpdates(mLocationListener);
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            if (requestCode == RC_SIGN_IN) {
-                Intent intent = new Intent(this, ProfileActivity.class);
-                startActivityForResult(intent, RC_PROFILE);
+            if (requestCode == 0) {
                 return;
             }
-            if (requestCode == RC_PROFILE) {
+            if (requestCode == 0) {
                 //
                 //
                 //
@@ -147,18 +155,39 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
     }
 
-    @Override
-    public void onClick(View view) {
+    private void createAccount(final User u) {
+        mAuth.createUserWithEmailAndPassword(u.getEmail(), u.getMacaddress())
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (!task.isSuccessful()) {
 
+                            Log.d(TAG, "createUserWithEmail: " + task.getException().getMessage());
+                        } else {
+                            u.setUid(task.getResult().getUser().getUid());
+                            saveUser(u);
+                            Log.d(TAG, "createUserWithEmail:onComplete:" + task.getResult().getUser().getUid());
+                        }
+                    }
+                });
     }
 
-    private void updateLocation(String uid, UserLocation l) {
+    private void saveUser(final User u){
+        myRef.child("users/"+u.getUid()).setValue(u).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                //
+            }
+        });
+    }
+
+    private void updateLocation() {
         if (ActivityCompat.checkSelfPermission(this, permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             return;
         }
         mLocationManager.removeUpdates(mLocationListener);
-        myRef.child("location/"+uid).setValue(l);
+        myRef.child("users/"+KokuvaApp.getInstance().getUser().getUid()).setValue(KokuvaApp.getInstance().getUser());
     }
 
     private void getUserFromFirebase(String uid){
@@ -167,15 +196,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue()!=null) {
-                    KokuvaApp.getInstance().setProfile(dataSnapshot.getValue(Profile.class));
-                    profile = KokuvaApp.getInstance().getProfile();
-                    setupViewPager();
+                    KokuvaApp.getInstance().setUser(dataSnapshot.getValue(User.class));
                     hideProgressDialog();
-                    if (profile.getPhotos().size() == 0) {
-
-                        Intent intent = new Intent(getBaseContext(), ProfileActivity.class);
-                        startActivityForResult(intent, RC_PROFILE);
-                    }
                 }
                 else {
                 }
@@ -186,23 +208,5 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             }
         });
-    }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
-//        return true;
-//    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        switch (item.getItemId()) {
-            case R.id.profile:
-                Intent intent = new Intent(this, ProfileActivity.class);
-                startActivityForResult(intent, RC_PROFILE);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 }

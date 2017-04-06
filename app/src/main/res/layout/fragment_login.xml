@@ -11,20 +11,32 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.kokuva.LoginActivity">
 
-    <Button
+    <EditText
+        android:id="@+id/editText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/google"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/google"/>
+        android:layout_marginBottom="120dp"
+        android:ems="10"
+        android:inputType="textPersonName" />
 
     <Button
-        android:id="@+id/facebook"
+        android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/facebook"
-        android:layout_marginBottom="18dp"
-        android:layout_above="@+id/google"
-        android:layout_alignEnd="@+id/google"/>
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="53dp"
+        android:text="Button" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/editText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="39dp"
+        android:text="TextView" />
+
 </RelativeLayout>

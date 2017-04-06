@@ -4,16 +4,23 @@ import android.app.Application;
 import android.content.Context;
 
 import com.google.firebase.database.FirebaseDatabase;
-import com.kokuva.model.Profile;
+import com.kokuva.model.User;
 
 /**
  * Created by Alexandre on 19/09/2016.
  */
 public class KokuvaApp extends Application {
-    public static int LOGIN_FACEBOOK = 100;
-    public static int LOGIN_GOOGLE = 200;
     private static KokuvaApp ourInstance = new KokuvaApp();
-    private Profile profile;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    private User user;
     private Context context;
 
     public static KokuvaApp getInstance() {
@@ -23,25 +30,15 @@ public class KokuvaApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        if(profile==null)
-            profile = new Profile();
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
     }
 
     public Context getContext() {
         return context;
     }
-
     public void setContext(Context context) {
         this.context = context;
     }
 
-    public Profile getProfile() {
-        return profile;
-    }
-
-    public void setProfile(Profile profile) {
-        this.profile = profile;
-    }
 
 }
