@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:baselineAligned="false"
+                android:orientation="vertical"
+                tools:context=".PhotoActivity"
+                android:weightSum="1"
+                android:nestedScrollingEnabled="false"
+    >
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/list"
+            android:layout_above="@+id/post_camera"
+            >
+        </android.support.v7.widget.RecyclerView>
+
+        <ImageButton
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:text="tire uma foto"
+            android:id="@+id/post_camera"
+            android:gravity="center_vertical|right"
+            android:drawableLeft="@drawable/ic_action_camera"
+            android:textSize="18dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentEnd="false"
+            android:src="@drawable/ic_action_camera"/>
+
+        <com.kokuva.AutoFitTextureView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/textureView"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="false"
+            />
+
+</RelativeLayout>

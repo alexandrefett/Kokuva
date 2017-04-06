@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "583010496955",
+    "firebase_url": "https://kokuva-b6525.firebaseio.com",
+    "project_id": "kokuva-b6525",
+    "storage_bucket": "kokuva-b6525.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:583010496955:android:066d20bc4282ff5d",
+        "android_client_info": {
+          "package_name": "com.kokuva"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "583010496955-pk31g3fc5m756hrujph6pg492f77a23f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0n4oCj4I8520PtDYpeTFhxND7IlUD560"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
