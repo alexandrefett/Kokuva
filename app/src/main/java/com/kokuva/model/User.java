@@ -1,5 +1,7 @@
 package com.kokuva.model;
 
+import android.graphics.Bitmap;
+
 import java.util.HashMap;
 
 /**
@@ -7,6 +9,26 @@ import java.util.HashMap;
  */
 
 public class User {
+
+    public Bitmap getImage() {
+        return image;
+    }
+
+    public void setImage(Bitmap image) {
+        this.image = image;
+    }
+
+    private Bitmap image;
+
+    public String getImagefile() {
+        return imagefile;
+    }
+
+    public void setImagefile(String imagefile) {
+        this.imagefile = imagefile;
+    }
+
+    private String imagefile;
 
     public String getMacaddress() {
         return macaddress;

@@ -12,7 +12,7 @@ public class BaseActivity extends AppCompatActivity {
     public ProgressDialog mProgressDialog;
     public static final String TAG="--->>>";
 
-    public void showProgressDialog() {
+    public void showDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setMessage(getString(R.string.loading));
@@ -22,7 +22,7 @@ public class BaseActivity extends AppCompatActivity {
         mProgressDialog.show();
     }
 
-    public void hideProgressDialog() {
+    public void hideDialog() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.dismiss();
         }
@@ -31,7 +31,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        hideProgressDialog();
+        hideDialog();
     }
 
 }
