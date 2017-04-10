@@ -14,13 +14,14 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.Query;
 import com.kokuva.R;
+import com.kokuva.model.KokuvaUser;
 
 import java.util.ArrayList;
 
 /**
  * Created by Alexandre on 22/07/2016.
  */
-public class FirebaseNearUsersAdapter extends FirebaseRecyclerAdapter<FirebaseNearUsersAdapter.UserViewHolder, FirebaseUser>{
+public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersAdapter.UserViewHolder, KokuvaUser>{
 
     public static class UserViewHolder extends RecyclerView.ViewHolder{
         public ImageView image;
@@ -36,8 +37,8 @@ public class FirebaseNearUsersAdapter extends FirebaseRecyclerAdapter<FirebaseNe
     private Context context;
     private Activity activity;
 
-    public FirebaseNearUsersAdapter(Query query, Class<FirebaseUser> itemClass, @Nullable ArrayList<FirebaseUser> items,
-                                    @Nullable ArrayList<String> keys) {
+    public FirebaseUsersAdapter(Query query, Class<KokuvaUser> itemClass, @Nullable ArrayList<KokuvaUser> items,
+                                @Nullable ArrayList<String> keys) {
         super(query, itemClass, items, keys);
     }
 
@@ -56,10 +57,10 @@ public class FirebaseNearUsersAdapter extends FirebaseRecyclerAdapter<FirebaseNe
 
     @Override
     public void onBindViewHolder(final UserViewHolder viewHolder, final int position){
-        final FirebaseUser user = getItem(position);
+        final KokuvaUser user = getItem(position);
 
         viewHolder.image.setOnClickListener(null);
-        viewHolder.nick.setText(user.getDisplayName());
+        viewHolder.nick.setText(user.getNick_name());
         viewHolder.image.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -73,22 +74,22 @@ public class FirebaseNearUsersAdapter extends FirebaseRecyclerAdapter<FirebaseNe
 
 
     @Override
-    protected void itemAdded(FirebaseUser item, String key, int position) {
+    protected void itemAdded(KokuvaUser item, String key, int position) {
 
     }
 
     @Override
-    protected void itemChanged(FirebaseUser oldItem, FirebaseUser newItem, String key, int position) {
+    protected void itemChanged(KokuvaUser oldItem, KokuvaUser newItem, String key, int position) {
 
     }
 
     @Override
-    protected void itemRemoved(FirebaseUser item, String key, int position) {
+    protected void itemRemoved(KokuvaUser item, String key, int position) {
 
     }
 
     @Override
-    protected void itemMoved(FirebaseUser item, String key, int oldPosition, int newPosition) {
+    protected void itemMoved(KokuvaUser item, String key, int oldPosition, int newPosition) {
 
     }
 }

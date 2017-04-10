@@ -1,18 +1,15 @@
 package com.kokuva;
 
 import android.*;
-import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -22,9 +19,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.kokuva.model.Position;
 
-import static android.content.Context.LOCATION_SERVICE;
-
-public class FragmentBrowseUsers extends BaseFragment {
+public class RoomActivity extends BaseActivity {
 
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
@@ -32,24 +27,13 @@ public class FragmentBrowseUsers extends BaseFragment {
     private FirebaseUser user;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle args = getArguments();
-        if(args!=null) {
-            //category = args.getString("category", "");
-        }
+        setContentView(R.layout.activity_room);
+
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
         getLocation();
-
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view =  inflater.inflate(R.layout.fragment_browseusers, container, false);
-
-        return view;
     }
 
     @Override
@@ -65,12 +49,11 @@ public class FragmentBrowseUsers extends BaseFragment {
 
     private void getLocation() {
         showDialog();
-        mLocationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
+        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(final Location location) {
                 Log.d(TAG, "onLocationChanged: " + location.getLatitude());
-                //KokuvaApp.getInstance().getUser().setLocation(location.getLatitude(), location.getLongitude());
                 Position p = new Position(user.getUid(), location.getLatitude(), location.getLongitude());
                 updateLocation(p);
             }
@@ -91,7 +74,8 @@ public class FragmentBrowseUsers extends BaseFragment {
             }
         };
 
-        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             return;
         }
@@ -99,7 +83,8 @@ public class FragmentBrowseUsers extends BaseFragment {
     }
 
     private void updateLocation(Position l) {
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             return;
         }
@@ -121,5 +106,4 @@ public class FragmentBrowseUsers extends BaseFragment {
     private void deactiveUser(){
         myRef.child("users").child(user.getUid()).removeValue();
     }
-
 }

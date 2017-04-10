@@ -5,6 +5,7 @@ import android.content.Context;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
+import com.kokuva.model.KokuvaUser;
 
 /**
  * Created by Alexandre on 19/09/2016.
@@ -39,6 +40,7 @@ public class KokuvaApp extends Application {
     public void setContext(Context context) {
         this.context = context;
     }
+
 
 
 }

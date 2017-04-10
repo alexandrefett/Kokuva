@@ -9,15 +9,14 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -25,7 +24,6 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -79,7 +77,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 Log.d(TAG, "onAuthStateChanged");
-                FirebaseUser user = firebaseAuth.getCurrentUser();
+                user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getEmail());
@@ -87,7 +85,7 @@ public class MainActivity extends BaseActivity {
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getPhotoUrl());
                     KokuvaApp.getInstance().setUser(user);
                     hideDialog();
-                    fillFragment();
+                    fillViews();
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                     loginUser();
@@ -101,7 +99,6 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 updateProfile(nick.getText().toString().trim(), userUrl);
-                //enter browse users
             }
         });
 
@@ -112,14 +109,8 @@ public class MainActivity extends BaseActivity {
                 showMenu();
             }
         });
-
-/*        if (mAuth.getCurrentUser() == null) {
-            loginUser();
-        } else {
-            getUserFromFirebase(mAuth.getCurrentUser().getUid());
-        }
-        */
     }
+
     private String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
         try {
@@ -226,12 +217,15 @@ public class MainActivity extends BaseActivity {
             });
     }
 
-    private void fillFragment(){
-        user = KokuvaApp.getInstance().getUser();
-        Glide.with(this)
-                .load(user.getPhotoUrl())
-                .into(userphoto);
-        nick.setText(user.getDisplayName());
+    private void fillViews(){
+        if(user.getPhotoUrl()!=null) {
+            Glide.with(this)
+                    .load(user.getPhotoUrl())
+                    .into(userphoto);
+        }
+        if(user.getDisplayName()!=null) {
+            nick.setText(user.getDisplayName());
+        }
     }
 
     private void showMenu(){
@@ -248,8 +242,7 @@ public class MainActivity extends BaseActivity {
                         startActivityForResult(photoPickerIntent, 1);
                         break;
                 }
-                // The 'which' argument contains the index position
-                // of the selected item
+
             }
         });
         menu = builder.create();
@@ -280,8 +273,9 @@ public class MainActivity extends BaseActivity {
 
         if(p!=null) {
             Bitmap bmp = BitmapFactory.decodeFile(p);
+            Bitmap bmp2 = scaleCenterCrop(bmp, 1024, 1024);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            bmp2.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] b = baos.toByteArray();
 
             StorageReference imagesRef = storageRef.child("users/" + user.getUid() + ".jpg");
@@ -306,6 +300,28 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    public Bitmap scaleCenterCrop(Bitmap source, int newHeight, int newWidth) {
+        int sourceWidth = source.getWidth();
+        int sourceHeight = source.getHeight();
+
+        float xScale = (float) newWidth / sourceWidth;
+        float yScale = (float) newHeight / sourceHeight;
+        float scale = Math.max(xScale, yScale);
+
+        float scaledWidth = scale * sourceWidth;
+        float scaledHeight = scale * sourceHeight;
+
+        float left = (newWidth - scaledWidth) / 2;
+        float top = (newHeight - scaledHeight) / 2;
+
+        RectF targetRect = new RectF(left, top, left + scaledWidth, top + scaledHeight);
+
+        Bitmap dest = Bitmap.createBitmap(newWidth, newHeight, source.getConfig());
+        Canvas canvas = new Canvas(dest);
+        canvas.drawBitmap(source, null, targetRect, null);
+
+        return dest;
+    }
     private void updateUser(final String n, final String p){
 
         FirebaseUser user = KokuvaApp.getInstance().getUser();
@@ -329,6 +345,8 @@ public class MainActivity extends BaseActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "User profile updated.");
+                            Intent intent = new Intent(getBaseContext(), RoomActivity.class);
+                            startActivityForResult(intent, 1);
                             // goto browser user online
                         }
                         hideDialog();

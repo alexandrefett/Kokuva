@@ -4,7 +4,7 @@ package com.kokuva.model;
  * Created by Alexandre on 21/09/2016.
  */
 
-public class KUser {
+public class KokuvaUser {
 
     public String getNick_name() {
         return nick_name;
@@ -45,7 +45,7 @@ public class KUser {
 
     private double log;
 
-    public KUser(String uid, double lat, double log){
+    public KokuvaUser(String uid, double lat, double log){
         this.lat = lat;
         this.log = log;
         this.uid = uid;
