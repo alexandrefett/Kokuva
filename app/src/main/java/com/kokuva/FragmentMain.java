@@ -113,7 +113,7 @@ public class FragmentMain extends BaseFragment {
             nick.setError("Digite um apelido.");
         }
         else{
-github            KokuvaApp.getInstance().getUser().setNick(n);
+            KokuvaApp.getInstance().getUser().setNick(n);
             myRef.child("users").child(KokuvaApp.getInstance().getUser().getUid()).child("nick").setValue(n).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
