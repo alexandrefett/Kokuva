@@ -61,9 +61,11 @@ public class MainActivity extends BaseActivity {
 
         setContentView(R.layout.activity_main);
 
+        showDialog();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                Log.d(TAG, "onAuthStateChanged");
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
@@ -71,22 +73,23 @@ public class MainActivity extends BaseActivity {
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                     createUser();
+//                    createUser();
                 }
             }
         };
-        mAuth.addAuthStateListener(mAuthListener);
+
 
 /*        if (mAuth.getCurrentUser() == null) {
-            createUser();
+            loginUser();
         } else {
             getUserFromFirebase(mAuth.getCurrentUser().getUid());
         }
         */
-
     }
 
     private void createUser(){
-        User user = new User();
+        Log.d(TAG, "loginUser");
+        final User user = new User();
         TelephonyManager t = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
         user.setPhone(t.getLine1Number());
 
@@ -102,11 +105,10 @@ public class MainActivity extends BaseActivity {
         WifiInfo wInfo = wifiManager.getConnectionInfo();
         user.setMacaddress(wInfo.getMacAddress());
 
-        user.setEmail("alexandrefett@gmail.com");
-        user.setMacaddress("00:00:00:00:00:00");
-        user.setPhone("21983297979");
-        createAccount(user);
+        Log.d(TAG, "loginUser: " + user.getEmail());
+        Log.d(TAG, "loginUser: " + user.getMacaddress());
 
+        createAccount(user);
     }
 
 
@@ -119,49 +121,73 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onStop() {
         super.onStop();
-//        mLocationManager.removeUpdates(mLocationListener);
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
     }
 
     private void createAccount(final User u) {
+        Log.d(TAG, "createAccount");
         mAuth.createUserWithEmailAndPassword(u.getEmail(), u.getMacaddress())
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (!task.isSuccessful()) {
-                            Log.d(TAG, "createUserWithEmail: " + task.getException().getMessage());
-                        } else {
-                            u.setUid(task.getResult().getUser().getUid());
-                            saveUser(u);
-                            Log.d(TAG, "createUserWithEmail:onComplete:" + task.getResult().getUser().getUid());
+            .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    Log.d(TAG, "OnComplete:");
+                }
+            })
+            .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                @Override
+                public void onSuccess(AuthResult authResult) {
+                    u.setUid(authResult.getUser().getUid());
+                    saveUser(u);
+                    Log.d(TAG, "OnSuccessListener:" + authResult.getUser().getUid());
+                }
+            })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d(TAG, "onFailure:" + e.getMessage());
+                    mAuth.signInWithEmailAndPassword(u.getEmail(), u.getMacaddress())
+                    .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                        @Override
+                        public void onSuccess(AuthResult authResult) {
+                            Log.d(TAG, "onSuccess Login Email:" + authResult.getUser().getUid());
+                            hideDialog();
                         }
-                    }
-                });
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "onFailure Login:" + e.getMessage());
+                            hideDialog();
+                        }
+                    });
+                }
+            });
     }
 
     private void saveUser(final User u){
+        Log.d(TAG, "saveUser");
+
         myRef.child("users/"+u.getUid()).setValue(u).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                getUserFromFirebase(u.getUid());
+                Log.d(TAG, "userSaved");
             }
         });
     }
 
     private void getUserFromFirebase(String uid){
-        showDialog();
+        Log.d(TAG, "getUserFromFirebase");
         myRef.child("users/"+uid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue()!=null) {
-                    KokuvaApp.getInstance().setUser(dataSnapshot.getValue(User.class));
-                    hideDialog();
-                }
-                else {
-                }
                 Log.d(TAG, "getUserFromFirebase:" + dataSnapshot.toString());
+                if(dataSnapshot.getValue()!=null) {
+                    Log.d(TAG, "getUserFromFirebase:" + dataSnapshot.toString());
+                    KokuvaApp.getInstance().setUser(dataSnapshot.getValue(User.class));
+                }
+                hideDialog();
             }
 
             @Override
@@ -171,7 +197,7 @@ public class MainActivity extends BaseActivity {
         });
     }
 
-    private void browseUsers(){
+    public void browseUsers(){
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         Fragment newFragment = new FragmentBrowseUsers();

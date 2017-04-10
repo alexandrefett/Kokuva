@@ -1,11 +1,8 @@
 package com.kokuva;
 
-import android.*;
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,10 +14,15 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -32,12 +34,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.kokuva.model.User;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-
 import de.hdodenhof.circleimageview.CircleImageView;
-
 import static android.content.Context.LOCATION_SERVICE;
 
 public class FragmentMain extends BaseFragment {
@@ -47,6 +46,8 @@ public class FragmentMain extends BaseFragment {
     private StorageReference storageRef;
     private CircleImageView userphoto;
     private User user;
+    private EditText nick;
+    private Button enter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,8 +68,19 @@ public class FragmentMain extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.fragment_login, container, false);
+
+        nick = (EditText)view.findViewById(R.id.textnick);
+        enter = (Button)view.findViewById(R.id.buttonenter);
+        enter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveNick(nick.getText().toString().trim());
+                //enter browse users
+            }
+        });
+
         userphoto = (CircleImageView)view.findViewById(R.id.userphoto);
-        userphoto.setOnClickListener(new View.OnClickListener() {
+/*        userphoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(KokuvaApp.getInstance().getUser().getImagefile()==null){
@@ -79,11 +91,36 @@ public class FragmentMain extends BaseFragment {
                 }
             }
         });
+        */
         return view;
     }
 
+    private void browseUsers(){
+        if(nick.getText().toString().trim().equals("")){
+            nick.setError("Digite um apelido.");
+        }
+        else{
+            ((MainActivity)getActivity()).browseUsers();
+            // busca usuario que ja existe
+        }
+    }
     private void showMenu(){
 
+    }
+
+    private void saveNick(String n){
+        if(n.equals("")){
+            nick.setError("Digite um apelido.");
+        }
+        else{
+            KokuvaApp.getInstance().getUser().setNick(n);
+            myRef.child("users").child(KokuvaApp.getInstance().getUser().getUid()).child("nick").setValue(n).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    ((MainActivity)getActivity()).browseUsers();
+                }
+            });
+        }
     }
 
     private void getImagePicker(){
@@ -98,10 +135,11 @@ public class FragmentMain extends BaseFragment {
         myRef.child("users/"+user.getUid()+"/imagefile").setValue(user.getImagefile()).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                hideDialog();
+                browseUsers();
             }
         });
     }
+
     private String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
         try {

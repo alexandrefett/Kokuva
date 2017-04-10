@@ -23,7 +23,7 @@
         android:layout_centerHorizontal="true"/>
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/textnick"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -33,7 +33,7 @@
         android:inputType="textPersonName" />
 
     <Button
-        android:id="@+id/enter"
+        android:id="@+id/buttonenter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -45,7 +45,7 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/editText"
+        android:layout_above="@+id/textnick"
         android:layout_centerHorizontal="true"
         android:text="Apelido" />
 

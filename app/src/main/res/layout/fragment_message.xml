@@ -11,10 +11,4 @@
               android:padding="16dp">
 
 
-    <TextView
-        android:text="Mensagens"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView5"
-        android:textSize="24sp"/>
 </LinearLayout>

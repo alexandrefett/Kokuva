@@ -33,6 +33,7 @@ public class FragmentBrowseUsers extends BaseFragment {
         if(args!=null) {
             //category = args.getString("category", "");
         }
+        getLocation();
     }
 
     @Override
