@@ -15,8 +15,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.kokuva.model.Position;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -25,6 +29,7 @@ public class FragmentBrowseUsers extends BaseFragment {
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
     private DatabaseReference myRef;
+    private FirebaseUser user;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,7 +38,10 @@ public class FragmentBrowseUsers extends BaseFragment {
         if(args!=null) {
             //category = args.getString("category", "");
         }
+        myRef = FirebaseDatabase.getInstance().getReference();
+        user = KokuvaApp.getInstance().getUser();
         getLocation();
+
     }
 
     @Override
@@ -49,6 +57,12 @@ public class FragmentBrowseUsers extends BaseFragment {
         super.onStart();
     }
 
+    @Override
+    public void onStop(){
+        super.onStop();
+        deactiveUser();
+    }
+
     private void getLocation() {
         showDialog();
         mLocationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
@@ -56,8 +70,9 @@ public class FragmentBrowseUsers extends BaseFragment {
             @Override
             public void onLocationChanged(final Location location) {
                 Log.d(TAG, "onLocationChanged: " + location.getLatitude());
-                KokuvaApp.getInstance().getUser().setLocation(location.getLatitude(), location.getLongitude());
-                updateLocation();
+                //KokuvaApp.getInstance().getUser().setLocation(location.getLatitude(), location.getLongitude());
+                Position p = new Position(user.getUid(), location.getLatitude(), location.getLongitude());
+                updateLocation(p);
             }
 
             @Override
@@ -83,18 +98,28 @@ public class FragmentBrowseUsers extends BaseFragment {
         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1, 1, mLocationListener);
     }
 
-    private void updateLocation() {
+    private void updateLocation(Position l) {
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             return;
         }
         mLocationManager.removeUpdates(mLocationListener);
-        myRef.child("users/"+KokuvaApp.getInstance().getUser().getUid()).setValue(KokuvaApp.getInstance().getUser()).addOnCompleteListener(new OnCompleteListener<Void>() {
+        myRef.child("users").child(user.getUid()).setValue(l).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 hideDialog();
             }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: " + e.getMessage());
+                hideDialog();
+            }
         });
+    }
+
+    private void deactiveUser(){
+        myRef.child("users").child(user.getUid()).removeValue();
     }
 
 }
