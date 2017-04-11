@@ -132,8 +132,8 @@ public class MainActivity extends BaseActivity {
 
         Log.d(TAG, "loginUser: " + user_email);
         Log.d(TAG, "loginUser: " + user_mac);
-        user_email = "alexandrefett@everst.com.br";
-        user_mac = "00:00:00:00:00:00:00:00";
+        //user_email = "alexandrefett@everst.com.br";
+        //user_mac = "00:00:00:00:00:00:00:00";
         userLogin(user_email, user_mac);
     }
 

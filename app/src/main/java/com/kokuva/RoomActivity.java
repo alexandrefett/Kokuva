@@ -67,7 +67,7 @@ public class RoomActivity extends BaseActivity {
     @Override
     public void onStop(){
         super.onStop();
-        exitRoom();
+        //exitRoom();
     }
 
     private void getLocation() {
