@@ -60,7 +60,7 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
         final KokuvaUser user = getItem(position);
 
         viewHolder.image.setOnClickListener(null);
-        viewHolder.nick.setText(user.getNick_name());
+        viewHolder.nick.setText(user.getDisplayName());
         viewHolder.image.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {

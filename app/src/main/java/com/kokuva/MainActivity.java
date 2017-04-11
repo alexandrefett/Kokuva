@@ -56,9 +56,9 @@ public class MainActivity extends BaseActivity {
     private CircleImageView userphoto;
     private EditText nick;
     private Button enter;
-    private String userUrl;
     private FirebaseUser user;
-    private boolean updatePhoto;
+    private static int REQUEST_IMAGE_CAPTURE = 1;
+    private static int REQUEST_IMAGE_GALLERY = 2;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,7 +72,6 @@ public class MainActivity extends BaseActivity {
 
         setContentView(R.layout.activity_main);
 
-        showDialog();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -87,6 +86,7 @@ public class MainActivity extends BaseActivity {
                     hideDialog();
                     fillViews();
                 } else {
+                    showDialog();
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                     loginUser();
                 }
@@ -98,7 +98,7 @@ public class MainActivity extends BaseActivity {
         enter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                updateProfile(nick.getText().toString().trim(), userUrl);
+                updateNick(nick.getText().toString().trim());
             }
         });
 
@@ -111,20 +111,6 @@ public class MainActivity extends BaseActivity {
         });
     }
 
-    private String getRealPathFromURI(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
 
     private void loginUser(){
         Log.d(TAG, "loginUser");
@@ -146,7 +132,8 @@ public class MainActivity extends BaseActivity {
 
         Log.d(TAG, "loginUser: " + user_email);
         Log.d(TAG, "loginUser: " + user_mac);
-
+        user_email = "alexandrefett@everst.com.br";
+        user_mac = "00:00:00:00:00:00:00:00";
         userLogin(user_email, user_mac);
     }
 
@@ -235,11 +222,15 @@ public class MainActivity extends BaseActivity {
             public void onClick(DialogInterface dialog, int which) {
                 switch(which){
                     case 0:
+                        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                        }
                         break;
                     case 1:
                         Intent photoPickerIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         photoPickerIntent.setType("image/*");
-                        startActivityForResult(photoPickerIntent, 1);
+                        startActivityForResult(photoPickerIntent, REQUEST_IMAGE_GALLERY);
                         break;
                 }
 
@@ -253,105 +244,87 @@ public class MainActivity extends BaseActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == 1) {
+            if (requestCode == REQUEST_IMAGE_GALLERY) {
                 Uri selectedImageUri = data.getData();
                 if (selectedImageUri != null) {
-                    String path = getRealPathFromURI(this, selectedImageUri);
+                    String path = Utils.getRealPathFromURI(this, selectedImageUri);
                     File imgFile = new File(path);
                     if (imgFile.exists()) {
-                        userUrl = imgFile.getAbsolutePath();
-                        updatePhoto = true;
-                        Log.d(TAG,"userUrl:"+userUrl);
+                        uploadPhoto(Utils.pathToBitmap(imgFile.getAbsolutePath()));
                     }
                 }
+            }
+            if(requestCode==REQUEST_IMAGE_CAPTURE){
+                showDialog();
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                userphoto.setImageBitmap(imageBitmap);
+                uploadPhoto(imageBitmap);
             }
         }
     }
 
-    private void updateProfile(final String n, final String p){
-        showDialog();
+    private void updateNick(final String n){
 
-        if(p!=null) {
-            Bitmap bmp = BitmapFactory.decodeFile(p);
-            Bitmap bmp2 = scaleCenterCrop(bmp, 1024, 1024);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bmp2.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] b = baos.toByteArray();
-
-            StorageReference imagesRef = storageRef.child("users/" + user.getUid() + ".jpg");
-
-            UploadTask uploadTask = imagesRef.putBytes(b);
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    hideDialog();
-                    //alert error
-                }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    @SuppressWarnings("VisibleForTests") String url = taskSnapshot.getDownloadUrl().toString();
-                    updateUser(n, url);
-                }
-            });
-        }
-        else{
-            updateUser(n, p);
-        }
-    }
-
-    public Bitmap scaleCenterCrop(Bitmap source, int newHeight, int newWidth) {
-        int sourceWidth = source.getWidth();
-        int sourceHeight = source.getHeight();
-
-        float xScale = (float) newWidth / sourceWidth;
-        float yScale = (float) newHeight / sourceHeight;
-        float scale = Math.max(xScale, yScale);
-
-        float scaledWidth = scale * sourceWidth;
-        float scaledHeight = scale * sourceHeight;
-
-        float left = (newWidth - scaledWidth) / 2;
-        float top = (newHeight - scaledHeight) / 2;
-
-        RectF targetRect = new RectF(left, top, left + scaledWidth, top + scaledHeight);
-
-        Bitmap dest = Bitmap.createBitmap(newWidth, newHeight, source.getConfig());
-        Canvas canvas = new Canvas(dest);
-        canvas.drawBitmap(source, null, targetRect, null);
-
-        return dest;
-    }
-    private void updateUser(final String n, final String p){
-
-        FirebaseUser user = KokuvaApp.getInstance().getUser();
-
-        UserProfileChangeRequest profileUpdates;
-        if(!updatePhoto){
-            profileUpdates = new UserProfileChangeRequest.Builder()
-                    .setDisplayName(n)
-                    .build();
-        }
-        else {
-            profileUpdates = new UserProfileChangeRequest.Builder()
-                    .setDisplayName(n)
-                    .setPhotoUri(Uri.parse(p))
-                    .build();
-        }
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+            .setDisplayName(n)
+            .build();
 
         user.updateProfile(profileUpdates)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "User profile updated.");
-                            Intent intent = new Intent(getBaseContext(), RoomActivity.class);
-                            startActivityForResult(intent, 1);
-                            // goto browser user online
-                        }
-                        hideDialog();
+            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "User profile updated.");
+                        Intent intent = new Intent(getBaseContext(), RoomActivity.class);
+                        startActivityForResult(intent, 1);
+                        // goto browser user online
                     }
-                });
+                    hideDialog();
+                }
+            });
+    }
 
+    private void uploadPhoto(final Bitmap bmp){
+        showDialog();
+
+        byte[] b = Utils.bitmapToByteArray(bmp);
+
+        StorageReference imagesRef = storageRef.child("users/" + user.getUid() + ".jpg");
+
+        UploadTask uploadTask = imagesRef.putBytes(b);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                hideDialog();
+                //alert error
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                @SuppressWarnings("VisibleForTests") String url = taskSnapshot.getDownloadUrl().toString();
+                updatePhotoUrl(url);
+            }
+        });
+    }
+
+    private void updatePhotoUrl(final String url){
+
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+            .setPhotoUri(Uri.parse(url))
+            .build();
+
+        user.updateProfile(profileUpdates)
+            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "User profile updated.");
+                        Intent intent = new Intent(getBaseContext(), RoomActivity.class);
+                        startActivityForResult(intent, 1);
+                        // goto browser user online
+                    }
+                }
+            });
     }
 }

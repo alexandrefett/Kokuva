@@ -1,20 +1,35 @@
 package com.kokuva.model;
 
+import com.google.firebase.auth.FirebaseUser;
+
 /**
  * Created by Alexandre on 21/09/2016.
  */
 
 public class KokuvaUser {
 
-    public String getNick_name() {
-        return nick_name;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setNick_name(String nick_name) {
-        this.nick_name = nick_name;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
-    private String nick_name;
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    private String displayName;
+    private String uid;
+    private String photoUrl;
+    private double lat;
+    private double log;
+
     public String getUid() {
         return uid;
     }
@@ -22,10 +37,6 @@ public class KokuvaUser {
     public void setUid(String uid) {
         this.uid = uid;
     }
-
-    private String uid;
-
-    private double lat;
 
     public double getLat() {
         return lat;
@@ -43,11 +54,12 @@ public class KokuvaUser {
         this.log = log;
     }
 
-    private double log;
 
-    public KokuvaUser(String uid, double lat, double log){
+    public KokuvaUser(FirebaseUser u, double lat, double log){
         this.lat = lat;
         this.log = log;
-        this.uid = uid;
+        this.displayName = u.getDisplayName();
+        this.uid = u.getUid();
+        this.photoUrl = u.getPhotoUrl().toString();
     }
 }
