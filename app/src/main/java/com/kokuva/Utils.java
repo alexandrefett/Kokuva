@@ -42,7 +42,7 @@ public class Utils {
 
     public static byte[] bitmapToByteArray(Bitmap bmp){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        bmp.compress(Bitmap.CompressFormat.JPEG, 85, baos);
         byte[] b = baos.toByteArray();
         return b;
     }

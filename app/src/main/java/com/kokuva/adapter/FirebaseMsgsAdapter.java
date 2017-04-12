@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.Query;
 import com.kokuva.R;
 import com.kokuva.model.KokuvaUser;
@@ -22,7 +21,7 @@ import java.util.ArrayList;
 /**
  * Created by Alexandre on 22/07/2016.
  */
-public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersAdapter.UserViewHolder, KokuvaUser>{
+public class FirebaseMsgsAdapter extends FirebaseRecyclerAdapter<FirebaseMsgsAdapter.UserViewHolder, KokuvaUser>{
 
     public static class UserViewHolder extends RecyclerView.ViewHolder{
         public ImageView image;
@@ -38,8 +37,8 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
     private Context context;
     private Activity activity;
 
-    public FirebaseUsersAdapter(Query query, Class<KokuvaUser> itemClass, @Nullable ArrayList<KokuvaUser> items,
-                                @Nullable ArrayList<String> keys) {
+    public FirebaseMsgsAdapter(Query query, Class<KokuvaUser> itemClass, @Nullable ArrayList<KokuvaUser> items,
+                               @Nullable ArrayList<String> keys) {
         super(query, itemClass, items, keys);
     }
 

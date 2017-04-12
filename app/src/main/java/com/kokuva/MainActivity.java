@@ -1,11 +1,14 @@
 package com.kokuva;
 
+import android.*;
+import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,6 +20,8 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -59,6 +64,7 @@ public class MainActivity extends BaseActivity {
     private FirebaseUser user;
     private static int REQUEST_IMAGE_CAPTURE = 1;
     private static int REQUEST_IMAGE_GALLERY = 2;
+    private static int REQUEST_PERMISSIONS = 3;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -111,30 +117,69 @@ public class MainActivity extends BaseActivity {
         });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
 
-    private void loginUser(){
-        Log.d(TAG, "loginUser");
-        TelephonyManager t = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
-        String user_phone = t.getLine1Number();
+        if (requestCode == REQUEST_PERMISSIONS) {
 
-        Pattern email = Patterns.EMAIL_ADDRESS;
-        Account[] accounts = AccountManager.get(this).getAccounts();
-        String user_email = null;
-        for (Account account : accounts) {
-            if (email.matcher(account.name).matches()) {
-                user_email = account.name;
+            // Received permission result for camera permission.est.");
+            // Check if the only required permission has been granted
+            if (grantResults.length >= 1){
+                for(int p:grantResults){
+                    Log.d(TAG, "Permission: "+p);
+                }
+                loginUser();
             }
         }
+    }
 
-        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        WifiInfo wInfo = wifiManager.getConnectionInfo();
-        String user_mac = wInfo.getMacAddress();
+    private void getPermission(){
+        Log.d(TAG, "GET_PERMISSIONS");
+        ActivityCompat.requestPermissions(MainActivity.this, new String[]
+            {Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.GET_ACCOUNTS,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.ACCESS_WIFI_STATE},REQUEST_PERMISSIONS);
+    }
 
-        Log.d(TAG, "loginUser: " + user_email);
-        Log.d(TAG, "loginUser: " + user_mac);
-        //user_email = "alexandrefett@everst.com.br";
-        //user_mac = "00:00:00:00:00:00:00:00";
-        userLogin(user_email, user_mac);
+    private void loginUser(){
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED  ||
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            getPermission();
+            Log.d(TAG, "READ_PHONE_STATE");
+        }
+        else {
+
+            Log.d(TAG, "loginUser");
+            TelephonyManager t = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
+//        String user_phone = t.getLine1Number();
+
+            Pattern email = Patterns.EMAIL_ADDRESS;
+            Account[] accounts = AccountManager.get(getApplicationContext()).getAccounts();
+            String user_email = null;
+            for (Account account : accounts) {
+                Log.d(TAG, "account: " + account.name);
+                Log.d(TAG, "account: " + account.type);
+                if (email.matcher(account.name).matches()) {
+                    user_email = account.name;
+                }
+            }
+
+            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            WifiInfo wInfo = wifiManager.getConnectionInfo();
+            String user_mac = wInfo.getMacAddress();
+
+            Log.d(TAG, "loginUser: " + user_email);
+            Log.d(TAG, "loginUser: " + user_mac);
+            //user_email = "alexandrefett@everst.com.br";
+            //user_mac = "00:00:00:00:00:00:00:00";
+            userLogin(user_email, user_mac);
+        }
     }
 
     @Override
@@ -205,12 +250,12 @@ public class MainActivity extends BaseActivity {
     }
 
     private void fillViews(){
-        if(user.getPhotoUrl()!=null) {
+        if(user.getPhotoUrl()!=null && !user.getPhotoUrl().equals("")) {
             Glide.with(this)
                     .load(user.getPhotoUrl())
                     .into(userphoto);
         }
-        if(user.getDisplayName()!=null) {
+        if(user.getDisplayName()!=null && !user.getDisplayName().equals("")) {
             nick.setText(user.getDisplayName());
         }
     }
@@ -258,7 +303,6 @@ public class MainActivity extends BaseActivity {
                 showDialog();
                 Bundle extras = data.getExtras();
                 Bitmap imageBitmap = (Bitmap) extras.get("data");
-                userphoto.setImageBitmap(imageBitmap);
                 uploadPhoto(imageBitmap);
             }
         }
@@ -286,7 +330,6 @@ public class MainActivity extends BaseActivity {
     }
 
     private void uploadPhoto(final Bitmap bmp){
-        showDialog();
 
         byte[] b = Utils.bitmapToByteArray(bmp);
 
@@ -304,6 +347,10 @@ public class MainActivity extends BaseActivity {
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 @SuppressWarnings("VisibleForTests") String url = taskSnapshot.getDownloadUrl().toString();
                 updatePhotoUrl(url);
+                Glide.with(getBaseContext())
+                        .load(url)
+                        .into(userphoto);
+                hideDialog();
             }
         });
     }
@@ -314,17 +361,6 @@ public class MainActivity extends BaseActivity {
             .setPhotoUri(Uri.parse(url))
             .build();
 
-        user.updateProfile(profileUpdates)
-            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful()) {
-                        Log.d(TAG, "User profile updated.");
-                        Intent intent = new Intent(getBaseContext(), RoomActivity.class);
-                        startActivityForResult(intent, 1);
-                        // goto browser user online
-                    }
-                }
-            });
+        user.updateProfile(profileUpdates);
     }
 }

@@ -62,4 +62,6 @@ public class KokuvaUser {
         this.uid = u.getUid();
         this.photoUrl = u.getPhotoUrl().toString();
     }
+
+    public KokuvaUser(){}
 }

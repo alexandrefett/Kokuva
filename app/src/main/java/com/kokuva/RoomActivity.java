@@ -1,5 +1,6 @@
 package com.kokuva;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -8,6 +9,9 @@ import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -17,9 +21,17 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.kokuva.adapter.FirebaseUsersAdapter;
 import com.kokuva.model.KokuvaUser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RoomActivity extends BaseActivity {
 
@@ -27,6 +39,7 @@ public class RoomActivity extends BaseActivity {
     private LocationListener mLocationListener;
     private DatabaseReference myRef;
     private FirebaseUser user;
+    private RecyclerView list_users;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +48,7 @@ public class RoomActivity extends BaseActivity {
 
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
+        list_users = (RecyclerView)findViewById(R.id.users_list);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -42,6 +56,41 @@ public class RoomActivity extends BaseActivity {
         getLocation();
     }
 
+    private void getUsers(){
+        myRef.child("users");
+
+        ArrayList<KokuvaUser> users = new ArrayList<KokuvaUser>();
+        ArrayList<String> usersKeys = new ArrayList<String>();
+        Query recentPostsQuery = myRef.child("users");
+
+        recentPostsQuery.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> list = dataSnapshot.getChildren();
+
+//                List<KokuvaUser> userList = new ArrayList<>();
+//                for (DataSnapshot dataSnapshot1 : list) {
+//                    if (!dataSnapshot1.getKey().equals(user.getUid())) {
+//                        userList.add(dataSnapshot1.getValue(KokuvaUser.class));
+//                    }
+//                }
+                Log.d(TAG, "getUsers : "+dataSnapshot.getChildrenCount());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        FirebaseUsersAdapter userAdapter = new FirebaseUsersAdapter(recentPostsQuery, KokuvaUser.class, users, usersKeys);
+        userAdapter.setContext(this, this);
+        list_users.setItemAnimator(new DefaultItemAnimator());
+        StaggeredGridLayoutManager stag = new StaggeredGridLayoutManager(2,1);
+        list_users.setLayoutManager(stag);
+        list_users.setAdapter(userAdapter);
+
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_room, menu);
@@ -113,7 +162,7 @@ public class RoomActivity extends BaseActivity {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     hideDialog();
-                    queryUsers(l);
+                    getUsers();
                 }
             })
             .addOnFailureListener(new OnFailureListener() {
@@ -127,6 +176,19 @@ public class RoomActivity extends BaseActivity {
 
     private void queryUsers(Location l){
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        exitRoom();
+        finish();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        exitRoom();
     }
 
     private void exitRoom(){
