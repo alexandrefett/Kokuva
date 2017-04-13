@@ -42,5 +42,17 @@ public class KokuvaApp extends Application {
     }
 
 
+    public static boolean isActivityVisible() {
+        return chatActivity;
+    }
 
+    public static void activityResumed() {
+        chatActivity = true;
+    }
+
+    public static void activityPaused() {
+        chatActivity = false;
+    }
+
+    private static boolean chatActivity;
 }
