@@ -2,6 +2,7 @@ package com.kokuva.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,7 +14,12 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.kokuva.ChatActivity;
+import com.kokuva.FragmentUsers;
+import com.kokuva.KokuvaApp;
 import com.kokuva.R;
 import com.kokuva.model.KokuvaUser;
 
@@ -65,10 +71,14 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
         viewHolder.image.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent i = new Intent(context, PostViewActivity.class);
-//                MyApplication.getInstance().setPost(post);
-//                int result = 4;
-//                activity.startActivityForResult(i, result);
+
+                DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
+                myRef.child("users").child(user.getUid()).child("chat").child("uid").setValue(KokuvaApp.getInstance().getUser().getUid());
+
+                Intent i = new Intent(context, ChatActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                KokuvaApp.getInstance().activityResumed();
+                activity.startActivityForResult(i, 1);
             }
         });
         Glide.with(context)
@@ -78,22 +88,15 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
 
 
     @Override
-    protected void itemAdded(KokuvaUser item, String key, int position) {
-
-    }
+    protected void itemAdded(KokuvaUser item, String key, int position) {    }
 
     @Override
-    protected void itemChanged(KokuvaUser oldItem, KokuvaUser newItem, String key, int position) {
-
-    }
+    protected void itemChanged(KokuvaUser oldItem, KokuvaUser newItem, String key, int position) {    }
 
     @Override
-    protected void itemRemoved(KokuvaUser item, String key, int position) {
-
-    }
+    protected void itemRemoved(KokuvaUser item, String key, int position) {    }
 
     @Override
-    protected void itemMoved(KokuvaUser item, String key, int oldPosition, int newPosition) {
+    protected void itemMoved(KokuvaUser item, String key, int oldPosition, int newPosition) {    }
 
-    }
 }

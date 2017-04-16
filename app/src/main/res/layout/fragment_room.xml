@@ -6,10 +6,29 @@
     android:layout_height="match_parent"
     tools:context="com.kokuva.RoomActivity">
 
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/users_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="8dp"
+        android:layout_below="@+id/toolbar" />
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="0dp"></android.support.v7.widget.Toolbar>
+
     <TabHost
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tabHost">
+        android:layout_below="@+id/toolbar"
+        android:id="@+id/tabUsers">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -52,6 +71,5 @@
             </FrameLayout>
         </LinearLayout>
     </TabHost>
-
 
 </RelativeLayout>

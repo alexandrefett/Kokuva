@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TabHost;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -40,6 +41,7 @@ public class RoomActivity extends BaseActivity {
     private DatabaseReference myRef;
     private FirebaseUser user;
     private RecyclerView list_users;
+    private TabHost tabHost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +50,8 @@ public class RoomActivity extends BaseActivity {
 
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
-        list_users = (RecyclerView)findViewById(R.id.users_list);
+        //list_users = (RecyclerView)findViewById(R.id.users_list);
+        tabHost = (TabHost) findViewById(R.id.tabHost);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -56,8 +59,11 @@ public class RoomActivity extends BaseActivity {
         getLocation();
     }
 
+    private void setPageViewer(){
+
+    }
+
     private void getUsers(){
-        myRef.child("users");
 
         ArrayList<KokuvaUser> users = new ArrayList<KokuvaUser>();
         ArrayList<String> usersKeys = new ArrayList<String>();
@@ -172,10 +178,6 @@ public class RoomActivity extends BaseActivity {
                 hideDialog();
                 }
             });
-    }
-
-    private void queryUsers(Location l){
-
     }
 
     @Override

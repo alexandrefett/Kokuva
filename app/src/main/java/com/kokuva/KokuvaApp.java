@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.kokuva.model.KokuvaUser;
 
@@ -37,10 +38,10 @@ public class KokuvaApp extends Application {
     public Context getContext() {
         return context;
     }
+
     public void setContext(Context context) {
         this.context = context;
     }
-
 
     public static boolean isActivityVisible() {
         return chatActivity;
@@ -55,4 +56,11 @@ public class KokuvaApp extends Application {
     }
 
     private static boolean chatActivity;
+
+    public void addChat(String uidTo){
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
+        myRef.child("users").child(uidTo).setValue("chat/"+user.getUid());
+    }
+
+
 }
