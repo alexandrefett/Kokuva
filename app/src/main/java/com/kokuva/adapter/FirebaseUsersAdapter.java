@@ -72,8 +72,8 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
             @Override
             public void onClick(View view) {
 
-                DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
-                myRef.child("users").child(user.getUid()).child("chat").child("uid").setValue(KokuvaApp.getInstance().getUser().getUid());
+//                DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
+//                myRef.child("users").child(user.getUid()).child("chat").child("uid").setValue(KokuvaApp.getInstance().getUser().getUid());
 
                 Intent i = new Intent(context, ChatActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);

@@ -51,12 +51,13 @@ public class RoomActivity extends BaseActivity {
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
         //list_users = (RecyclerView)findViewById(R.id.users_list);
-        tabHost = (TabHost) findViewById(R.id.tabHost);
+        //tabHost = (TabHost) findViewById(R.id.tabHost);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
 
         getLocation();
+
     }
 
     private void setPageViewer(){

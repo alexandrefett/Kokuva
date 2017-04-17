@@ -19,15 +19,15 @@ import com.kokuva.views.UserTabView;
 public class FragmentUsers extends BaseFragment {
     private DatabaseReference myRef;
     private FirebaseUser user;
-    private TabHost usersTabs;
-    private String userToId;
+    //private TabHost usersTabs;
+    //private String userToId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         if(args!=null) {
-            userToId = args.getString("userToId", "");
+            //userToId = args.getString("userToId", "");
         }
 
         myRef = FirebaseDatabase.getInstance().getReference();
@@ -36,20 +36,21 @@ public class FragmentUsers extends BaseFragment {
     }
 
     private void addUserTab(KokuvaUser u){
-        usersTabs.addView(new UserTabView(getContext(), u));
+//        usersTabs.addView(new UserTabView(getContext(), u));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view =  inflater.inflate(R.layout.fragment_message, container, false);
-        usersTabs = (TabHost)view.findViewById(R.id.tabUsers);
-
-        myRef.child("users").child(userToId).addChildEventListener(new ChildEventListener() {
+        View view =  inflater.inflate(R.layout.fragment_users, container, false);
+//        usersTabs = (TabHost)view.findViewById(R.id.tabUsers);
+        myRef.child("invite").child(user.getUid()).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                addUserTab(dataSnapshot.getValue(KokuvaUser.class));
+//                addUserTab(dataSnapshot.getValue(KokuvaUser.class));
+                String chatid = new String(dataSnapshot.getValue(String.class));
                 Log.d(TAG, "childAdded: "+s);
+                Log.d(TAG, "chatid: "+chatid);
             }
 
             @Override
