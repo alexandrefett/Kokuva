@@ -19,7 +19,6 @@ import com.kokuva.views.UserTabView;
 public class FragmentRoom extends BaseFragment {
     private DatabaseReference myRef;
     private FirebaseUser user;
-    private TabHost tabHost;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,8 +37,6 @@ public class FragmentRoom extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.fragment_message, container, false);
-        tabHost = (TabHost)view.findViewById(R.id.tabUsers);
-
 
         return view;
     }
@@ -48,4 +45,6 @@ public class FragmentRoom extends BaseFragment {
     public void onStart() {
         super.onStart();
     }
+
+
 }

@@ -9,13 +9,19 @@ import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TabHost;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -29,6 +35,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.kokuva.adapter.FirebaseUsersAdapter;
+import com.kokuva.adapter.ViewPagerAdapter;
 import com.kokuva.model.KokuvaUser;
 
 import java.util.ArrayList;
@@ -40,28 +47,61 @@ public class RoomActivity extends BaseActivity {
     private LocationListener mLocationListener;
     private DatabaseReference myRef;
     private FirebaseUser user;
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
     private RecyclerView list_users;
-    private TabHost tabHost;
+    private LinearLayout scroll_users;
+    private ViewPager pager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room);
 
+
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
-        //list_users = (RecyclerView)findViewById(R.id.users_list);
-        //tabHost = (TabHost) findViewById(R.id.tabHost);
 
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
+        pager = (ViewPager)findViewById(R.id.viewpager);
+        list_users = (RecyclerView)findViewById(R.id.users_list);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        list_users = (RecyclerView)findViewById(R.id.list_users);
+
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                R.string.open, R.string.close) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                getActionBar().setTitle("Kokuva");
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getActionBar().setTitle("Kokuva");
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+        };
+
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
 
         getLocation();
 
     }
 
     private void setPageViewer(){
-
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        adapter.addFragment(new FragmentRoom(),"");
+        pager.setAdapter(adapter);
     }
 
     private void getUsers(){
@@ -92,9 +132,10 @@ public class RoomActivity extends BaseActivity {
 
         FirebaseUsersAdapter userAdapter = new FirebaseUsersAdapter(recentPostsQuery, KokuvaUser.class, users, usersKeys);
         userAdapter.setContext(this, this);
-        list_users.setItemAnimator(new DefaultItemAnimator());
-        StaggeredGridLayoutManager stag = new StaggeredGridLayoutManager(2,1);
-        list_users.setLayoutManager(stag);
+        list_users.setLayoutManager(new LinearLayoutManager(this));
+//        list_users.setItemAnimator(new DefaultItemAnimator());
+//        StaggeredGridLayoutManager stag = new StaggeredGridLayoutManager(2,1);
+//        list_users.setLayoutManager(stag);
         list_users.setAdapter(userAdapter);
 
     }
