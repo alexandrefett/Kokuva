@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -30,6 +31,10 @@ import java.util.ArrayList;
  */
 public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersAdapter.UserViewHolder, KokuvaUser>{
 
+    public interface OnItemClickListener {
+        void onItemClick(KokuvaUser item);
+    }
+
     public static class UserViewHolder extends RecyclerView.ViewHolder{
         public ImageView image;
         public TextView nick;
@@ -43,12 +48,16 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
 
     private Context context;
     private Activity activity;
+    private OnItemClickListener listener;
 
     public FirebaseUsersAdapter(Query query, Class<KokuvaUser> itemClass, @Nullable ArrayList<KokuvaUser> items,
                                 @Nullable ArrayList<String> keys) {
         super(query, itemClass, items, keys);
     }
 
+    public void addOnClickItemListener(OnItemClickListener listener){
+        this.listener = listener;
+    }
     public void setContext(Context c, Activity a ){
         this.context = c;
         this.activity =  a;
@@ -71,14 +80,7 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
         viewHolder.image.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-
-//                DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
-//                myRef.child("users").child(user.getUid()).child("chat").child("uid").setValue(KokuvaApp.getInstance().getUser().getUid());
-
-                Intent i = new Intent(context, ChatActivity.class);
-                i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                KokuvaApp.getInstance().activityResumed();
-                activity.startActivityForResult(i, 1);
+                listener.onItemClick(user);
             }
         });
         Glide.with(context)
