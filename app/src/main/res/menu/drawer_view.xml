@@ -3,15 +3,11 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_first_fragment"
-            android:icon="@android:drawable/ic_delete"
-            android:title="First" />
+            android:icon="@android:drawable/ic_input_add"
+            android:title="Retornar a sala" />
         <item
-            android:id="@+id/nav_second_fragment"
+            android:id="@+id/nav_exit"
             android:icon="@android:drawable/ic_delete"
-            android:title="Second" />
-        <item
-            android:id="@+id/nav_third_fragment"
-            android:icon="@android:drawable/ic_delete"
-            android:title="Third" />
+            android:title="Sair da sala" />
     </group>
 </menu>

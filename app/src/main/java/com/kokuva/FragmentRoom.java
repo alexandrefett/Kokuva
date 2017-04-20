@@ -7,6 +7,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -31,6 +32,8 @@ import com.kokuva.model.KokuvaUser;
 import com.kokuva.views.UserTabView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -160,12 +163,20 @@ public class FragmentRoom extends BaseFragment {
         userAdapter.addOnClickItemListener(new FirebaseUsersAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(KokuvaUser item) {
-                //cria chat
-                //convida usuario
-                //myRef.child("users").child("chats").child(String.valueOf(System.currentTimeMillis())).setValue()
+            String chatId = myRef.child("chats").push().getKey();
+
+                Map<String, Object> data = new HashMap<String, Object>();
+                data.put("chats/"+chatId+"/"+user.getUid(), true);
+                data.put("chats/"+chatId+"/"+item.getUid(), true);
+                data.put("users/"+user.getUid()+"/chats/"+chatId, true);
+                data.put("users/"+item.getUid()+"/chats/"+chatId, true);
+
+                myRef.updateChildren(data);
+
             }
         });
-        list_users.setLayoutManager(new LinearLayoutManager(getContext()));
+        RecyclerView.LayoutManager lm = new GridLayoutManager(getContext(),2);
+        list_users.setLayoutManager(lm);
         list_users.setAdapter(userAdapter);
 
     }
