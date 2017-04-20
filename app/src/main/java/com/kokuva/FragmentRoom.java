@@ -168,8 +168,10 @@ public class FragmentRoom extends BaseFragment {
                 Map<String, Object> data = new HashMap<String, Object>();
                 data.put("chats/"+chatId+"/"+user.getUid(), true);
                 data.put("chats/"+chatId+"/"+item.getUid(), true);
-                data.put("users/"+user.getUid()+"/chats/"+chatId, true);
-                data.put("users/"+item.getUid()+"/chats/"+chatId, true);
+//                data.put("users/"+user.getUid()+"/chats/"+chatId+"/"+item.getUid(), true);
+//                data.put("users/"+item.getUid()+"/chats/"+chatId+"/"+user.getUid(), true);
+                data.put("users/"+user.getUid()+"/chats/"+chatId, item.getUid());
+                data.put("users/"+item.getUid()+"/chats/"+chatId, user.getUid());
 
                 myRef.updateChildren(data);
 
