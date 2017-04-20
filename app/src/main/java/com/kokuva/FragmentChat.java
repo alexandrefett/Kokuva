@@ -29,6 +29,17 @@ public class FragmentChat extends BaseFragment {
     private ImageButton button_send;
     private LinearLayout scroll_messages;
 
+    public static FragmentChat newInstance(String value) {
+        FragmentChat myFragment = new FragmentChat();
+
+        if(value!=null) {
+            Bundle args = new Bundle();
+            args.putString("value", value);
+            myFragment.setArguments(args);
+        }
+        return myFragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

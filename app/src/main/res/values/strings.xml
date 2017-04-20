@@ -3,8 +3,8 @@
     <string name="loading">Aguarde...</string>
     <string name="app_id">168239490285373</string>
     <string name="namespace">kokuva_vone</string>
-    <string name="open">kokuva_open</string>
-    <string name="close">kokuva_close</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
     <string-array name="navigation_drawer_items_array">
         <item>Sala</item>
         <item>Sair</item>

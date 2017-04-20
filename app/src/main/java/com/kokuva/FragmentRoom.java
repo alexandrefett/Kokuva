@@ -41,6 +41,17 @@ public class FragmentRoom extends BaseFragment {
     private LocationListener mLocationListener;
     private RecyclerView list_users;
 
+    public static FragmentRoom newInstance(String value) {
+        FragmentRoom myFragment = new FragmentRoom();
+
+        if(value!=null) {
+            Bundle args = new Bundle();
+            args.putString("value", value);
+            myFragment.setArguments(args);
+        }
+        return myFragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -14,13 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.kokuva.ChatActivity;
-import com.kokuva.FragmentUsers;
-import com.kokuva.KokuvaApp;
 import com.kokuva.R;
 import com.kokuva.model.KokuvaUser;
 
