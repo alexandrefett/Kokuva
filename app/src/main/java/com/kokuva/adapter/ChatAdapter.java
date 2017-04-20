@@ -32,7 +32,9 @@ public class ChatAdapter extends RecyclerView.Adapter<UserViewHolder>{
 
     public void addItem(KokuvaUser k){
         array.add(k);
+        notifyDataSetChanged();
     }
+
     @Override
     public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
         View view = LayoutInflater.from(context).inflate(R.layout.item_list_user, parent, false);
