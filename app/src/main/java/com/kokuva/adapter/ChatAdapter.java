@@ -47,10 +47,10 @@ public class ChatAdapter extends RecyclerView.Adapter<UserViewHolder>{
         final KokuvaUser u = array.get(position);
 
         Glide.with(context)
-            .load(u.getPhotoUrl())
+            .load(u.getUrl())
             .crossFade()
             .into(viewHolder.picture);
-        viewHolder.name.setText(u.getDisplayName());
+        viewHolder.name.setText(u.getNick());
         this.position = position;
     }
 

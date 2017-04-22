@@ -60,7 +60,7 @@ public class FirebaseMsgsAdapter extends FirebaseRecyclerAdapter<FirebaseMsgsAda
         final KokuvaUser user = getItem(position);
 
         viewHolder.image.setOnClickListener(null);
-        viewHolder.nick.setText(user.getDisplayName());
+        viewHolder.nick.setText(user.getNick());
         viewHolder.image.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -71,7 +71,7 @@ public class FirebaseMsgsAdapter extends FirebaseRecyclerAdapter<FirebaseMsgsAda
             }
         });
         Glide.with(context)
-                .load(user.getPhotoUrl())
+                .load(user.getUrl())
                 .into(viewHolder.image);
     }
 

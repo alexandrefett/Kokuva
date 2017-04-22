@@ -39,7 +39,7 @@ import static android.content.Context.LOCATION_SERVICE;
 
 public class FragmentRoom extends BaseFragment {
     private DatabaseReference myRef;
-    private FirebaseUser user;
+    private KokuvaUser user;
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
     private RecyclerView list_users;
@@ -114,24 +114,29 @@ public class FragmentRoom extends BaseFragment {
 
     private void updateLocation(final Location l) {
         mLocationManager.removeUpdates(mLocationListener);
-        KokuvaUser kuser = new KokuvaUser(user, l.getLatitude(), l.getLongitude());
+        user.setLat(l.getLatitude());
+        user.setLog(l.getLongitude());
 
-        myRef.child("users").child(user.getUid()).setValue(kuser)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("users/"+user.getUid()+"lat", user.getLat());
+        data.put("users/"+user.getUid()+"log", user.getLog());
+
+        myRef.updateChildren(data).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        hideDialog();
-                        getUsers();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "onFailure: " + e.getMessage());
-                        hideDialog();
-                    }
-                });
+            hideDialog();
+            getUsers();
+            }
+        })
+        .addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: " + e.getMessage());
+                hideDialog();
+            }
+        });
     }
+
     private void getUsers(){
 
         ArrayList<KokuvaUser> users = new ArrayList<KokuvaUser>();

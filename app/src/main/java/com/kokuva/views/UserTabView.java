@@ -34,7 +34,7 @@ public class UserTabView extends LinearLayout {
         userImage = (ImageView) rootView.findViewById(R.id.image_user);
         displayName = (TextView) rootView.findViewById(R.id.name_display);
         Glide.with(context)
-                .load(user.getPhotoUrl())
+                .load(user.getUrl())
                 .into(userImage);
     }
 }

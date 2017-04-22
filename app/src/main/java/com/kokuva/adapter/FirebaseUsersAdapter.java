@@ -70,7 +70,7 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
         final KokuvaUser user = getItem(position);
 
         viewHolder.image.setOnClickListener(null);
-        viewHolder.nick.setText(user.getDisplayName());
+        viewHolder.nick.setText(user.getNick());
         viewHolder.image.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -78,7 +78,7 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
             }
         });
         Glide.with(context)
-                .load(user.getPhotoUrl())
+                .load(user.getUrl())
                 .into(viewHolder.image);
     }
 

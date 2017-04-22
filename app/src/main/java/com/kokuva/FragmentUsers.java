@@ -18,7 +18,7 @@ import com.kokuva.views.UserTabView;
 
 public class FragmentUsers extends BaseFragment {
     private DatabaseReference myRef;
-    private FirebaseUser user;
+    private KokuvaUser user;
     //private TabHost usersTabs;
     //private String userToId;
 

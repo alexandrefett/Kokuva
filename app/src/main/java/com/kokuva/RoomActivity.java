@@ -8,7 +8,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -20,16 +19,16 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.kokuva.adapter.ChatAdapter;
 import com.kokuva.model.KokuvaUser;
-
 import java.util.ArrayList;
 
 public class RoomActivity extends BaseActivity {
 
     private DatabaseReference myRef;
-    private FirebaseUser user;
+    private KokuvaUser user;
     private DrawerLayout mDrawer;
     private Toolbar toolbar;
     private NavigationView nvDrawer;
@@ -58,26 +57,25 @@ public class RoomActivity extends BaseActivity {
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
 
-        RecyclerView list_users = (RecyclerView)findViewById(R.id.list_users);
+//        RecyclerView list_users = (RecyclerView)findViewById(R.id.list_users);
+        RecyclerView list_users = (RecyclerView)nvDrawer.getHeaderView(0);
         list_users.setLayoutManager(new LinearLayoutManager(this));
 
         chatAdapter = new ChatAdapter(this, this, new ArrayList<KokuvaUser>());
         list_users.setAdapter(chatAdapter);
 
         firebaseUserOnline();
-
-
     }
 
-
     private void firebaseUserOnline(){
-        myRef.child("users").child(user.getUid()).child("chats").addChildEventListener(new ChildEventListener() {
+        Query query = myRef.child("users");
+        query.orderByChild("log").startAt(-180).endAt(180).addChildEventListener(new ChildEventListener() {        //child(user.getUid()).child("chats").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG,"chats");
                 Log.d(TAG,"String: "+s);
                 Log.d(TAG,"dataSnap: "+dataSnapshot.toString());
-                String uid = (String)dataSnapshot.getValue(String.class);
+                String uid = dataSnapshot.getValue(String.class);
                 myRef.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -85,9 +83,7 @@ public class RoomActivity extends BaseActivity {
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
+                    public void onCancelled(DatabaseError databaseError) {   }
                 });
                 Log.d(TAG,"onChildAdded: ");
                 Log.d(TAG,"String: "+s);
@@ -116,9 +112,7 @@ public class RoomActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            public void onCancelled(DatabaseError databaseError) {  }
         });
     }
 

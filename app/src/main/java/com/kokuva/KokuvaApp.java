@@ -15,16 +15,14 @@ public class KokuvaApp extends Application {
     private static KokuvaApp ourInstance = new KokuvaApp();
 
     private Context context;
-    private FirebaseUser user;
+    private KokuvaUser user;
 
-    public FirebaseUser getUser() {
+    public KokuvaUser getUser() {
         return user;
     }
-
-    public void setUser(FirebaseUser user) {
+    public void setUser(KokuvaUser user) {
         this.user = user;
     }
-
     public static KokuvaApp getInstance() {
         return ourInstance;
     }

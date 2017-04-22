@@ -17,12 +17,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.kokuva.model.KokuvaUser;
 import com.kokuva.model.Message;
 
 public class FragmentChat extends BaseFragment {
 
     private DatabaseReference myRef;
-    private FirebaseUser user;
+    private KokuvaUser user;
     private String chatUid;
     private String toUid;
     private EditText text_msg;
