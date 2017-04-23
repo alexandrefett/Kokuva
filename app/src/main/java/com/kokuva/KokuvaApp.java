@@ -16,7 +16,6 @@ public class KokuvaApp extends Application {
 
     private Context context;
     private KokuvaUser user;
-
     public KokuvaUser getUser() {
         return user;
     }

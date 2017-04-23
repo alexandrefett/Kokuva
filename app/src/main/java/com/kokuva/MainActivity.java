@@ -1,17 +1,18 @@
 package com.kokuva;
 
-import android.*;
 import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Paint;
-import android.graphics.drawable.PaintDrawable;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -21,18 +22,18 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.TextView;
-
 import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -45,10 +46,11 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.kokuva.adapter.ImageAdapter;
 import com.kokuva.model.KokuvaUser;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -94,14 +96,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 Log.d(TAG, "onAuthStateChanged");
                 fbuser = firebaseAuth.getCurrentUser();
+                showDialog();
                 if (fbuser != null) {
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + fbuser.getUid());
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + fbuser.getEmail());
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + fbuser.getDisplayName());
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + fbuser.getPhotoUrl());
                     getKokuvaUser(fbuser.getUid());
                 } else {
-                    showDialog();
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                     loginUser();
                 }
@@ -112,25 +112,69 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         enter = (Button)findViewById(R.id.button_enter);
         enter.setOnClickListener(this);
 
-        userphoto = (CircleImageView)findViewById(R.id.userphoto);
+        userphoto = (CircleImageView)findViewById(R.id.user_photo);
         userphoto.setOnClickListener(this);
+
         grey = (TextView)findViewById(R.id.grey);
+        grey.setOnClickListener(this);
         green = (TextView)findViewById(R.id.green);
+        green.setOnClickListener(this);
         blue = (TextView)findViewById(R.id.blue);
+        blue.setOnClickListener(this);
         black = (TextView)findViewById(R.id.black);
+        black.setOnClickListener(this);
         purple = (TextView)findViewById(R.id.purple);
+        purple.setOnClickListener(this);
         red = (TextView)findViewById(R.id.red);
+        red.setOnClickListener(this);
         lightred = (TextView)findViewById(R.id.lightred);
+        lightred.setOnClickListener(this);
         orange = (TextView)findViewById(R.id.orange);
+        orange.setOnClickListener(this);
+    }
+
+    private void chooseAvatar(){
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.avatar_layout);
+        dialog.setTitle("Title...");
+
+        GridView grid = (GridView)dialog.findViewById(R.id.grid_avatar);
+        grid.setAdapter(new ImageAdapter(this));
+        grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if(i>0){
+                    user.setUrl((String)adapterView.getSelectedItem());
+                    user.setPhoto(false);
+                    updateUserUrl(user);
+                }
+                else{
+                    getImageDialog();
+                }
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
     }
 
     private void getKokuvaUser(String uid){
+        Log.d(TAG,"getKokuvaUser:"+uid);
         myRef.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                KokuvaApp.getInstance().setUser(dataSnapshot.getValue(KokuvaUser.class));
-                user = KokuvaApp.getInstance().getUser();
-                fillViews();
+                if(dataSnapshot.getValue()!=null) {
+                    Log.d(TAG,"dataSanpshot: "+dataSnapshot.toString());
+                    KokuvaApp.getInstance().setUser(dataSnapshot.getValue(KokuvaUser.class));
+                    user = KokuvaApp.getInstance().getUser();
+                    fillViews();
+                }
+                else {
+                    user = new KokuvaUser();
+                    user.setUid(fbuser.getUid());
+                    user.setPhoto(false);
+                    user.setColor(Color.BLACK);
+                    user.setUrl("user_14");
+                }
                 hideDialog();
             }
 
@@ -145,9 +189,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (requestCode == REQUEST_PERMISSIONS) {
-
-            // Received permission result for camera permission.est.");
-            // Check if the only required permission has been granted
             if (grantResults.length >= 1){
                 for(int p:grantResults){
                     Log.d(TAG, "Permission: "+p);
@@ -199,8 +240,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
             Log.d(TAG, "loginUser: " + user_email);
             Log.d(TAG, "loginUser: " + user_mac);
-            //user_email = "alexandrefett@everst.com.br";
-            //user_mac = "00:00:00:00:00:00:00:00";
             userLogin(user_email, user_mac);
         }
     }
@@ -244,12 +283,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     private void createAccount(final String email, final String pswd) {
         Log.d(TAG, "createAccount");
         mAuth.createUserWithEmailAndPassword(email, pswd)
-            .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    Log.d(TAG, "OnComplete:");
-                }
-            })
             .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                 @Override
                 public void onSuccess(AuthResult authResult) {
@@ -272,13 +305,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     }
 
     private void fillViews(){
-        if(user.getUrl()!=null && !user.getUrl().equals("")) {
+        if(user.isPhoto()) {
             Glide.with(this)
-                    .load(fbuser.getPhotoUrl())
+                    .load(user.getUrl())
                     .into(userphoto);
         }
-        if(fbuser.getDisplayName()!=null && !fbuser.getDisplayName().equals("")) {
-            nick.setText(fbuser.getDisplayName());
+        else {
+            userphoto.setImageResource(getResources().getIdentifier(user.getUrl(), "drawable", getPackageName()));
+        }
+        if(user.getNick()!=null && !user.getNick().equals("")) {
+            nick.setText(user.getNick());
             nick.setTextColor(user.getColor());
         }
     }
@@ -331,15 +367,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         }
     }
 
-    private void updateNick(final String n){
-        myRef.child("users").child(user.getUid()).child("nick").setValue(n).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "User profile updated.");
-                Intent intent = new Intent(getBaseContext(), RoomActivity.class);
-                startActivityForResult(intent, 1);
-            }
-        });
+    private void updateUser(){
+        String nickName = nick.getText().toString();
+
+        if(TextUtils.isEmpty(nickName)) {
+            nick.setError("Preencha um apelido.");
+            return;
+        } else {
+            myRef.child("users").child(user.getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Log.d(TAG, "User profile updated.");
+                    Intent intent = new Intent(getBaseContext(), RoomActivity.class);
+                    startActivityForResult(intent, 1);
+                }
+            });
+        }
     }
 
     private void uploadPhoto(final Bitmap bmp){
@@ -359,13 +402,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 @SuppressWarnings("VisibleForTests") String url = taskSnapshot.getDownloadUrl().toString();
                 user.setUrl(url);
-                updateUserUrl(url);
+                updateUserUrl(user);
             }
         });
     }
 
-    private void updateUserUrl(String url){
-        myRef.child("users").child(user.getUid()).child("url").setValue(url).addOnSuccessListener(new OnSuccessListener<Void>() {
+    private void updateUserUrl(KokuvaUser u){
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("users/"+user.getUid()+"url", u.getUrl());
+        data.put("users/"+user.getUid()+"photo", user.isPhoto());
+
+        myRef.updateChildren(data).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "User profile updated.");
@@ -403,16 +451,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 setColorText(view);
                 break;
             case R.id.button_enter:
-                updateNick(nick.getText().toString().trim());
+                updateUser();
                 break;
             case R.id.user_photo:
-                getImageDialog();
+                chooseAvatar();
                 break;
         }
     }
 
     private void setColorText(View v){
-        Paint p =((PaintDrawable) v.getBackground()).getPaint();
-        nick.setTextColor(p.getColor());
+        int color = Color.BLACK;
+        Drawable background = v.getBackground();
+        if (background instanceof ColorDrawable)
+            color = ((ColorDrawable) background).getColor();
+        nick.setTextColor(color);
+        user.setColor(color);
+        myRef.child("users").child(user.getUid()).child("color").setValue(color);
     }
 }

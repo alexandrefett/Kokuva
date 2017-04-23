@@ -24,6 +24,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.kokuva.adapter.ChatAdapter;
 import com.kokuva.model.KokuvaUser;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RoomActivity extends BaseActivity {
 
@@ -34,6 +36,7 @@ public class RoomActivity extends BaseActivity {
     private NavigationView nvDrawer;
     private ActionBarDrawerToggle drawerToggle;
     private ChatAdapter chatAdapter;
+    private RecyclerView list_users;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +61,7 @@ public class RoomActivity extends BaseActivity {
         user = KokuvaApp.getInstance().getUser();
 
 //        RecyclerView list_users = (RecyclerView)findViewById(R.id.list_users);
-        RecyclerView list_users = (RecyclerView)nvDrawer.getHeaderView(0);
+        list_users = (RecyclerView)nvDrawer.getHeaderView(0);
         list_users.setLayoutManager(new LinearLayoutManager(this));
 
         chatAdapter = new ChatAdapter(this, this, new ArrayList<KokuvaUser>());
@@ -193,4 +196,13 @@ public class RoomActivity extends BaseActivity {
         // Close the navigation drawer
         mDrawer.closeDrawers();
     }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        myRef.child("users").child(user.getUid()).child("lat").removeValue();
+        myRef.child("users").child(user.getUid()).child("log").removeValue();
+    }
 }
+
+

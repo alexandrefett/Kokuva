@@ -1,6 +1,7 @@
 package com.kokuva.model;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.kokuva.R;
 
 /**
  * Created by Alexandre on 21/09/2016.
@@ -14,6 +15,15 @@ public class KokuvaUser {
     private String url;
     private double lat;
     private double log;
+    private boolean photo = false;
+
+    public boolean isPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(boolean photo) {
+        this.photo = photo;
+    }
 
     public int getColor() {
         return color;

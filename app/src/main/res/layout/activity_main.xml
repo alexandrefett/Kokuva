@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
@@ -12,11 +13,8 @@
         android:id="@+id/user_photo"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
-        android:src="@drawable/ic_action_user"
-        app:civ_border_color="#FF000000"
-        app:civ_border_width="1dp" />
+        android:src="@drawable/user_14" />
 
     <TextView
         android:id="@+id/textView3"
@@ -25,6 +23,7 @@
         android:layout_above="@+id/textnick"
         android:layout_below="@+id/userphoto"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
         android:text="Apelido"
         android:textSize="24sp" />
 
@@ -34,12 +33,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
         android:ems="10"
         android:inputType="textPersonName" />
 
     <GridLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
         android:background="@color/common_google_signin_btn_text_dark_focused"
         android:columnCount="4"
         android:padding="1dp"
@@ -111,10 +112,11 @@
 
     <Button
         android:id="@+id/button_enter"
-        android:layout_width="wrap_content"
+        android:layout_width="188dp"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
         android:text="Entrar" />
 
 </LinearLayout>
