@@ -41,7 +41,6 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
     }
 
     private Context context;
-    private Activity activity;
     private OnItemClickListener listener;
 
     public FirebaseUsersAdapter(Query query, Class<KokuvaUser> itemClass, @Nullable ArrayList<KokuvaUser> items,
@@ -52,9 +51,8 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
     public void addOnClickItemListener(OnItemClickListener listener){
         this.listener = listener;
     }
-    public void setContext(Context c, Activity a ){
+    public void setContext(Context c){
         this.context = c;
-        this.activity =  a;
     }
 
     @Override
@@ -71,15 +69,21 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
 
         viewHolder.image.setOnClickListener(null);
         viewHolder.nick.setText(user.getNick());
+        viewHolder.nick.setTextColor(user.getColor());
+
         viewHolder.image.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 listener.onItemClick(user);
             }
         });
-        Glide.with(context)
-                .load(user.getUrl())
-                .into(viewHolder.image);
+        if(user.isPhoto())
+            Glide.with(context)
+                    .load(user.getUrl())
+                    .into(viewHolder.image);
+        else
+            viewHolder.image.setImageResource(context.getResources().getIdentifier(user.getUrl(), "drawable", context.getPackageName()));
+
     }
 
 

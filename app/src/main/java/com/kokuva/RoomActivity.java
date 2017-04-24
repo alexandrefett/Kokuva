@@ -1,5 +1,7 @@
 package com.kokuva;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -8,11 +10,19 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.SeekBar;
+import android.widget.TextView;
+
+import com.crystal.crystalrangeseekbar.widgets.BubbleThumbSeekbar;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -22,6 +32,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.kokuva.adapter.ChatAdapter;
+import com.kokuva.adapter.ImageAdapter;
 import com.kokuva.model.KokuvaUser;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,15 +75,47 @@ public class RoomActivity extends BaseActivity {
         list_users = (RecyclerView)nvDrawer.getHeaderView(0);
         list_users.setLayoutManager(new LinearLayoutManager(this));
 
-        chatAdapter = new ChatAdapter(this, this, new ArrayList<KokuvaUser>());
+        chatAdapter = new ChatAdapter(this, new ArrayList<KokuvaUser>());
         list_users.setAdapter(chatAdapter);
 
+        swapFragment(FragmentRoom.class);
         firebaseUserOnline();
     }
 
+    private void setDistance(){
+        //final Dialog dialog = new Dialog(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(R.layout.distance_layout);
+        builder.setTitle("Raio de busca");
+        SeekBar rangebar = (SeekBar) findViewById(R.id.seekBar2);
+        final TextView d = (TextView) findViewById(R.id.text_distance);
+        rangebar.setProgress(user.getDist()-1);
+        d.setText("Distância: "+user.getDist());
+        rangebar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                d.setText("Distância: "+(i+1));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {         }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {        }
+        });
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                user.setDist(i+1);
+            }
+        });
+
+//        dialog.show();
+    }
+
+
     private void firebaseUserOnline(){
-        Query query = myRef.child("users");
-        query.orderByChild("log").startAt(-180).endAt(180).addChildEventListener(new ChildEventListener() {        //child(user.getUid()).child("chats").addChildEventListener(new ChildEventListener() {
+        myRef.child("users").child(user.getUid()).child("chats").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG,"chats");
@@ -166,28 +209,17 @@ public class RoomActivity extends BaseActivity {
 
     public void selectDrawerItem(MenuItem menuItem) {
         // Create a new fragment and specify the fragment to show based on nav item clicked
-        Fragment fragment = null;
-        Class fragmentClass;
         switch(menuItem.getItemId()) {
             case R.id.nav_first_fragment:
-                fragmentClass = FragmentRoom.class;
+                swapFragment(FragmentRoom.class);
+                break;
+            case R.id.nav_distance:
+                setDistance();
                 break;
             case R.id.nav_exit:
-                fragmentClass = FragmentChat.class;
+                finish();
                 break;
-            default:
-                fragmentClass = FragmentRoom.class;
         }
-
-        try {
-            fragment = (Fragment) fragmentClass.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // Insert the fragment by replacing any existing fragment
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
 
         // Highlight the selected item has been done by NavigationView
         menuItem.setChecked(true);
@@ -195,6 +227,20 @@ public class RoomActivity extends BaseActivity {
         setTitle(menuItem.getTitle());
         // Close the navigation drawer
         mDrawer.closeDrawers();
+    }
+
+    private void swapFragment(Class t){
+        Fragment fragment = null;
+        Class fragmentClass = t;
+
+        try {
+            fragment = (Fragment) fragmentClass.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
     }
 
     @Override

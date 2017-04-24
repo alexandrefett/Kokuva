@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.kokuva.R;
 
@@ -40,14 +41,14 @@ public class ImageAdapter extends BaseAdapter {
         if (convertView == null) {
             // if it's not recycled, initialize some attributes
             imageView = new ImageView(mContext);
-            imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            imageView.setLayoutParams(new GridView.LayoutParams(150, 150));
+            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageView.setPadding(5, 5, 5, 5);
         } else {
             imageView = (ImageView) convertView;
         }
-        Log.d("->>>","mThu position: "+position);
-        imageView.setImageResource(mContext.getResources().getIdentifier(mThumbIds[position], "drawable", mContext.getPackageName()));
+        //imageView.setImageResource(mContext.getResources().getIdentifier(mThumbIds[position], "drawable", mContext.getPackageName()));
+        imageView.setImageResource(mTIds[position]);
         return imageView;
     }
 
@@ -55,4 +56,9 @@ public class ImageAdapter extends BaseAdapter {
     private String[] mThumbIds = {"add","man", "user","user_1","user_2","user_3","user_4","user_5",
             "user_6","user_7","user_8","user_9","user_10","user_11","user_12","user_13","user_14",
             "user_15","user_16","user_17","user_18","user_19","user_20","user_21","user_22"};
+    private Integer[] mTIds = {R.drawable.add, R.drawable.man, R.drawable.user, R.drawable.user_1
+            , R.drawable.user_2, R.drawable.user_3, R.drawable.user_4, R.drawable.user_5, R.drawable.user_6, R.drawable.user_7
+            , R.drawable.user_8, R.drawable.user_9, R.drawable.user_10, R.drawable.user_11, R.drawable.user_12, R.drawable.user_13
+            , R.drawable.user_14, R.drawable.user_15, R.drawable.user_16, R.drawable.user_17, R.drawable.user_18, R.drawable.user_19
+            , R.drawable.user_20, R.drawable.user_21, R.drawable.user_22};
 }

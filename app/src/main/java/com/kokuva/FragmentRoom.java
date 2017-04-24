@@ -118,8 +118,8 @@ public class FragmentRoom extends BaseFragment {
         user.setLog(l.getLongitude());
 
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("users/"+user.getUid()+"lat", user.getLat());
-        data.put("users/"+user.getUid()+"log", user.getLog());
+        data.put("users/"+user.getUid()+"/lat", user.getLat());
+        data.put("users/"+user.getUid()+"/log", user.getLog());
 
         myRef.updateChildren(data).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -164,7 +164,7 @@ public class FragmentRoom extends BaseFragment {
         });
 
         FirebaseUsersAdapter userAdapter = new FirebaseUsersAdapter(recentPostsQuery, KokuvaUser.class, users, usersKeys);
-        userAdapter.setContext(getContext(), getActivity());
+        userAdapter.setContext(getContext());
         userAdapter.addOnClickItemListener(new FirebaseUsersAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(KokuvaUser item) {
@@ -173,8 +173,6 @@ public class FragmentRoom extends BaseFragment {
                 Map<String, Object> data = new HashMap<String, Object>();
                 data.put("chats/"+chatId+"/"+user.getUid(), true);
                 data.put("chats/"+chatId+"/"+item.getUid(), true);
-//                data.put("users/"+user.getUid()+"/chats/"+chatId+"/"+item.getUid(), true);
-//                data.put("users/"+item.getUid()+"/chats/"+chatId+"/"+user.getUid(), true);
                 data.put("users/"+user.getUid()+"/chats/"+chatId, item.getUid());
                 data.put("users/"+item.getUid()+"/chats/"+chatId, user.getUid());
 

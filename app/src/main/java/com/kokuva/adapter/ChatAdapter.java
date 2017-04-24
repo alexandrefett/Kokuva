@@ -21,11 +21,9 @@ public class ChatAdapter extends RecyclerView.Adapter<UserViewHolder>{
     
     private Context context;
     private ArrayList<KokuvaUser> array;
-    private Activity a;
     private int position;
 
-    public ChatAdapter(Activity a, Context c, ArrayList<KokuvaUser> p){
-        this.a = a;
+    public ChatAdapter(Context c, ArrayList<KokuvaUser> p){
         this.context = c;
         this.array = p;
     }
@@ -45,12 +43,15 @@ public class ChatAdapter extends RecyclerView.Adapter<UserViewHolder>{
     @Override
     public void onBindViewHolder(final UserViewHolder viewHolder, final int position){
         final KokuvaUser u = array.get(position);
+        if(u.isPhoto())
+            Glide.with(context)
+                    .load(u.getUrl())
+                    .into(viewHolder.picture);
+        else
+            viewHolder.picture.setImageResource(context.getResources().getIdentifier(u.getUrl(), "drawable", context.getPackageName()));
 
-        Glide.with(context)
-            .load(u.getUrl())
-            .crossFade()
-            .into(viewHolder.picture);
         viewHolder.name.setText(u.getNick());
+        viewHolder.name.setTextColor(u.getColor());
         this.position = position;
     }
 

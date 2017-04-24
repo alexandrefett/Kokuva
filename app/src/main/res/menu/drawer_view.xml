@@ -3,8 +3,12 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_first_fragment"
-            android:icon="@android:drawable/ic_input_add"
-            android:title="Retornar a sala" />
+            android:icon="@drawable/ic_action_users"
+            android:title="Pessoas próximas" />
+        <item
+            android:id="@+id/nav_distance"
+            android:icon="@android:drawable/ic_dialog_map"
+            android:title="Distância" />
         <item
             android:id="@+id/nav_exit"
             android:icon="@android:drawable/ic_delete"

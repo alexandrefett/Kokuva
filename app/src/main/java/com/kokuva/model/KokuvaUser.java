@@ -16,6 +16,33 @@ public class KokuvaUser {
     private double lat;
     private double log;
     private boolean photo = false;
+    private String email;
+    private String mac;
+    private int dist;
+
+    public int getDist() {
+        return dist;
+    }
+
+    public void setDist(int dist) {
+        this.dist = dist;
+    }
+
+    public String getMac() {
+        return mac;
+    }
+
+    public void setMac(String mac) {
+        this.mac = mac;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public boolean isPhoto() {
         return photo;

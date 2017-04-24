@@ -35,16 +35,14 @@ public class FirebaseMsgsAdapter extends FirebaseRecyclerAdapter<FirebaseMsgsAda
     }
 
     private Context context;
-    private Activity activity;
 
     public FirebaseMsgsAdapter(Query query, Class<KokuvaUser> itemClass, @Nullable ArrayList<KokuvaUser> items,
                                @Nullable ArrayList<String> keys) {
         super(query, itemClass, items, keys);
     }
 
-    public void setContext(Context c, Activity a ){
+    public void setContext(Context c){
         this.context = c;
-        this.activity =  a;
     }
 
     @Override

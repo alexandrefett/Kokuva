@@ -9,11 +9,10 @@
         android:id="@+id/grid_avatar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:columnWidth="90dp"
-        android:numColumns="auto_fit"
-        android:verticalSpacing="5dp"
+        android:columnWidth="70dp"
+        android:gravity="center"
         android:horizontalSpacing="5dp"
-        android:stretchMode="columnWidth"
-        android:gravity="center"/>
+        android:numColumns="auto_fit"
+        android:verticalSpacing="5dp" />
 
 </LinearLayout>

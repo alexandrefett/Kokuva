@@ -4,11 +4,9 @@ import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -20,23 +18,24 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -46,26 +45,22 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.kokuva.adapter.ImageAdapter;
+import com.kokuva.dialogs.AvatarDialog;
 import com.kokuva.model.KokuvaUser;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MainActivity extends BaseActivity implements View.OnClickListener{
+public class MainActivity extends BaseActivity implements View.OnClickListener, AvatarDialog.AvatarDialogListener{
 
     private DatabaseReference myRef;
     private FirebaseAuth mAuth;
     private FirebaseStorage storage;
     private StorageReference storageRef;
-    private FirebaseAuth.AuthStateListener mAuthListener;
     private CircleImageView userphoto;
     private EditText nick;
     private Button enter;
-    private FirebaseUser fbuser;
     private KokuvaUser user;
     private TextView grey;
     private TextView green;
@@ -91,23 +86,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
 
         setContentView(R.layout.activity_main);
 
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                Log.d(TAG, "onAuthStateChanged");
-                fbuser = firebaseAuth.getCurrentUser();
-                showDialog();
-                if (fbuser != null) {
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + fbuser.getUid());
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + fbuser.getEmail());
-                    getKokuvaUser(fbuser.getUid());
-                } else {
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                    loginUser();
-                }
-            }
-        };
-
         nick = (EditText)findViewById(R.id.textnick);
         enter = (Button)findViewById(R.id.button_enter);
         enter.setOnClickListener(this);
@@ -132,55 +110,41 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         orange = (TextView)findViewById(R.id.orange);
         orange.setOnClickListener(this);
     }
-
-    private void chooseAvatar(){
-        final Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.avatar_layout);
-        dialog.setTitle("Title...");
-
-        GridView grid = (GridView)dialog.findViewById(R.id.grid_avatar);
-        grid.setAdapter(new ImageAdapter(this));
-        grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if(i>0){
-                    user.setUrl((String)adapterView.getSelectedItem());
-                    user.setPhoto(false);
-                    updateUserUrl(user);
-                }
-                else{
-                    getImageDialog();
-                }
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
+    private void chooseAvatar() {
+        DialogFragment newFragment = new AvatarDialog();
+        newFragment.show(getSupportFragmentManager(), "avatar");
     }
 
-    private void getKokuvaUser(String uid){
-        Log.d(TAG,"getKokuvaUser:"+uid);
+    private void getCurrentUser(final String uid){
         myRef.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                user = new KokuvaUser();
+
                 if(dataSnapshot.getValue()!=null) {
                     Log.d(TAG,"dataSanpshot: "+dataSnapshot.toString());
-                    KokuvaApp.getInstance().setUser(dataSnapshot.getValue(KokuvaUser.class));
-                    user = KokuvaApp.getInstance().getUser();
-                    fillViews();
+                    user = dataSnapshot.getValue(KokuvaUser.class);
                 }
                 else {
                     user = new KokuvaUser();
-                    user.setUid(fbuser.getUid());
+                    user.setUid(uid);
                     user.setPhoto(false);
                     user.setColor(Color.BLACK);
                     user.setUrl("user_14");
+                    user.setEmail(getEmail());
+                    user.setMac(getMac());
+                    user.setDist(1);
                 }
+                KokuvaApp.getInstance().setUser(user);
+                fillViews();
                 hideDialog();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                hideDialog();
+                Toast.makeText(MainActivity.this, "Error: "+databaseError.getMessage(),
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -193,7 +157,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                 for(int p:grantResults){
                     Log.d(TAG, "Permission: "+p);
                 }
-                loginUser();
             }
         }
     }
@@ -207,101 +170,63 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
                     Manifest.permission.ACCESS_WIFI_STATE},REQUEST_PERMISSIONS);
     }
 
-    private void loginUser(){
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED  ||
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            getPermission();
-            Log.d(TAG, "READ_PHONE_STATE");
-        }
-        else {
-
-            Log.d(TAG, "loginUser");
-            TelephonyManager t = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
-//        String user_phone = t.getLine1Number();
-
-            Pattern email = Patterns.EMAIL_ADDRESS;
-            Account[] accounts = AccountManager.get(getApplicationContext()).getAccounts();
-            String user_email = null;
-            for (Account account : accounts) {
-                Log.d(TAG, "account: " + account.name);
-                Log.d(TAG, "account: " + account.type);
-                if (email.matcher(account.name).matches()) {
-                    user_email = account.name;
-                }
+    private String getEmail(){
+        Pattern email = Patterns.EMAIL_ADDRESS;
+        Account[] accounts = AccountManager.get(getApplicationContext()).getAccounts();
+        String user_email = null;
+        for (Account account : accounts) {
+            Log.d(TAG, "account: " + account.name);
+            Log.d(TAG, "account: " + account.type);
+            if (email.matcher(account.name).matches()) {
+                user_email = account.name;
             }
-
-            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            WifiInfo wInfo = wifiManager.getConnectionInfo();
-            String user_mac = wInfo.getMacAddress();
-
-            Log.d(TAG, "loginUser: " + user_email);
-            Log.d(TAG, "loginUser: " + user_mac);
-            userLogin(user_email, user_mac);
         }
+        return user_email;
+    }
+
+    private String getMac(){
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wInfo = wifiManager.getConnectionInfo();
+        return wInfo.getMacAddress();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
+        showDialog();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        updateUI(currentUser);
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
-    }
-
-    private void userLogin(final String email, final String pswd){
-        mAuth.signInWithEmailAndPassword(email, pswd)
-            .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                @Override
-                public void onSuccess(AuthResult authResult) {
-                    Log.d(TAG, "onSuccess Login Email:" + authResult.getUser().getUid());
-                    hideDialog();
-                }
-            })
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    if (e instanceof FirebaseAuthException) {
-                        FirebaseAuthException ex = (FirebaseAuthException) e;
-                        Log.d(TAG, "onFailure Login:" + ex.getErrorCode());
-                        createAccount(email, pswd);
-                    }
-                    Log.d(TAG, "onFailure Login:" + e.getMessage());
-                }
-            });
-    }
-
-    private void createAccount(final String email, final String pswd) {
-        Log.d(TAG, "createAccount");
-        mAuth.createUserWithEmailAndPassword(email, pswd)
-            .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                @Override
-                public void onSuccess(AuthResult authResult) {
-                    Log.d(TAG, "OnSuccessListener:" + authResult.getUser().getUid());
-                }
-            })
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    if (e instanceof FirebaseAuthException) {
-                        FirebaseAuthException ex = (FirebaseAuthException) e;
-                        Log.d(TAG, "onFailure CreateAccount:" + ex.getErrorCode());
-                        if(ex.getErrorCode().equals("ERROR_EMAIL_ALREADY_IN_USE")){
-                            // alert email
+    private void signInAnonymously() {
+        showDialog();
+        mAuth.signInAnonymously()
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "signInAnonymously:success");
+                            FirebaseUser fuser = mAuth.getCurrentUser();
+                            updateUI(fuser);
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "signInAnonymously:failure", task.getException());
+                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                            updateUI(null);
                         }
                     }
-                    Log.d(TAG, "onFailure:" + e.getMessage());
-                }
-            });
+                });
+    }
+
+    private void updateUI(final FirebaseUser u){
+        boolean isSignedIn = (u != null);
+        if (isSignedIn) {
+            getCurrentUser(u.getUid());
+        } else {
+            signInAnonymously();
+        }
     }
 
     private void fillViews(){
@@ -374,6 +299,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             nick.setError("Preencha um apelido.");
             return;
         } else {
+            user.setNick(nickName);
             myRef.child("users").child(user.getUid()).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
@@ -402,25 +328,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 @SuppressWarnings("VisibleForTests") String url = taskSnapshot.getDownloadUrl().toString();
                 user.setUrl(url);
-                updateUserUrl(user);
-            }
-        });
-    }
-
-    private void updateUserUrl(KokuvaUser u){
-
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("users/"+user.getUid()+"url", u.getUrl());
-        data.put("users/"+user.getUid()+"photo", user.isPhoto());
-
-        myRef.updateChildren(data).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "User profile updated.");
-                Glide.with(getBaseContext())
-                        .load(user.getUrl())
-                        .into(userphoto);
-                hideDialog();
+                user.setPhoto(true);
             }
         });
     }
@@ -467,5 +375,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
         nick.setTextColor(color);
         user.setColor(color);
         myRef.child("users").child(user.getUid()).child("color").setValue(color);
+    }
+
+    @Override
+    public void onAvatarClick(String icon) {
+        if(icon.equals("add")){
+            getImageDialog();
+        }
+        else {
+            user.setUrl(icon);
+            user.setPhoto(false);
+            userphoto.setImageResource(getResources().getIdentifier(icon, "drawable", getPackageName()));
+        }
     }
 }
