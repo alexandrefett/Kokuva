@@ -1,26 +1,28 @@
 package com.kokuva;
 
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TabHost;
 
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.kokuva.adapter.ChatAdapter;
 import com.kokuva.model.KokuvaUser;
-import com.kokuva.views.UserTabView;
+
+import java.util.ArrayList;
 
 public class FragmentUsers extends BaseFragment {
     private DatabaseReference myRef;
     private KokuvaUser user;
-    //private TabHost usersTabs;
-    //private String userToId;
+    private ChatAdapter chatAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -32,52 +34,74 @@ public class FragmentUsers extends BaseFragment {
 
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
-
-    }
-
-    private void addUserTab(KokuvaUser u){
-//        usersTabs.addView(new UserTabView(getContext(), u));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.fragment_users, container, false);
-//        usersTabs = (TabHost)view.findViewById(R.id.tabUsers);
-        myRef.child("invite").child(user.getUid()).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-//                addUserTab(dataSnapshot.getValue(KokuvaUser.class));
-                String chatid = new String(dataSnapshot.getValue(String.class));
-                Log.d(TAG, "childAdded: "+s);
-                Log.d(TAG, "chatid: "+chatid);
-            }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+        RecyclerView list_users = (RecyclerView)view.findViewById(R.id.users_chat);
 
-            }
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+        list_users.setLayoutManager(layoutManager);
+        //list_users.setLayoutManager(new LinearLayoutManager(getContext()));
 
-            }
+        chatAdapter = new ChatAdapter(getContext(), new ArrayList<KokuvaUser>());
+        list_users.setAdapter(chatAdapter);
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        firebaseUserOnline();
         return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
+    }
+
+    private void firebaseUserOnline(){
+        myRef.child("users").child(user.getUid()).child("chats").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG,"chats");
+                Log.d(TAG,"String: "+s);
+                Log.d(TAG,"dataSnap: "+dataSnapshot.toString());
+                String uid = dataSnapshot.getValue(String.class);
+                myRef.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        chatAdapter.addItem(dataSnapshot.getValue(KokuvaUser.class));
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {   }
+                });
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG,"onChildChanged: ");
+                Log.d(TAG,"String: "+s);
+                Log.d(TAG,"dataSnap: "+dataSnapshot.toString());
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Log.d(TAG,"onChildRemoved: ");
+                Log.d(TAG,"dataSnap: "+dataSnapshot.toString());
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG,"onChildMoved: ");
+                Log.d(TAG,"String: "+s);
+                Log.d(TAG,"dataSnap: "+dataSnapshot.toString());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {  }
+        });
     }
 }

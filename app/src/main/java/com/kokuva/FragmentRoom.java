@@ -8,19 +8,15 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TabHost;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,7 +25,6 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.kokuva.adapter.FirebaseUsersAdapter;
 import com.kokuva.model.KokuvaUser;
-import com.kokuva.views.UserTabView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -143,40 +138,22 @@ public class FragmentRoom extends BaseFragment {
         ArrayList<String> usersKeys = new ArrayList<String>();
         Query recentPostsQuery = myRef.child("users");
 
-        recentPostsQuery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Iterable<DataSnapshot> list = dataSnapshot.getChildren();
-
-//                List<KokuvaUser> userList = new ArrayList<>();
-//                for (DataSnapshot dataSnapshot1 : list) {
-//                    if (!dataSnapshot1.getKey().equals(user.getUid())) {
-//                        userList.add(dataSnapshot1.getValue(KokuvaUser.class));
-//                    }
-//                }
-                Log.d(TAG, "getUsers : "+dataSnapshot.getChildrenCount());
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
         FirebaseUsersAdapter userAdapter = new FirebaseUsersAdapter(recentPostsQuery, KokuvaUser.class, users, usersKeys);
         userAdapter.setContext(getContext());
         userAdapter.addOnClickItemListener(new FirebaseUsersAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(KokuvaUser item) {
+
+
             String chatId = myRef.child("chats").push().getKey();
 
-                Map<String, Object> data = new HashMap<String, Object>();
-                data.put("chats/"+chatId+"/"+user.getUid(), true);
-                data.put("chats/"+chatId+"/"+item.getUid(), true);
-                data.put("users/"+user.getUid()+"/chats/"+chatId, item.getUid());
-                data.put("users/"+item.getUid()+"/chats/"+chatId, user.getUid());
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("chats/"+chatId+"/"+user.getUid(), true);
+            data.put("chats/"+chatId+"/"+item.getUid(), true);
+            data.put("users/"+user.getUid()+"/chats/"+chatId, item.getUid());
+            data.put("users/"+item.getUid()+"/chats/"+chatId, user.getUid());
 
-                myRef.updateChildren(data);
+            myRef.updateChildren(data);
 
             }
         });

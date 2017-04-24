@@ -1,40 +1,27 @@
-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/drawer_layout"
+    android:id="@+id/room_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     >
-
-    <!-- This LinearLayout represents the contents of the screen  -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <!-- The ActionBar displayed at the top -->
         <include
             layout="@layout/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <!-- The main content view where fragments are loaded -->
+
+        <fragment
+            android:id="@+id/fragment_users"
+            android:name="com.kokuva.FragmentUsers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <FrameLayout
             android:id="@+id/flContent"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
         </FrameLayout>
-    </LinearLayout>
-
-
-    <android.support.design.widget.NavigationView
-        android:id="@+id/nvView"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:layout_marginTop="?android:attr/actionBarSize"
-        android:background="@android:color/white"
-        app:headerLayout="@layout/drawer_layout"
-        app:menu="@menu/drawer_view">
-
-    </android.support.design.widget.NavigationView>
-</android.support.v4.widget.DrawerLayout>
+</LinearLayout>

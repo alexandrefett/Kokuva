@@ -24,8 +24,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,6 +47,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.kokuva.adapter.ColorAdapter;
 import com.kokuva.dialogs.AvatarDialog;
 import com.kokuva.model.KokuvaUser;
 import java.io.File;
@@ -93,22 +96,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         userphoto = (CircleImageView)findViewById(R.id.user_photo);
         userphoto.setOnClickListener(this);
 
-        grey = (TextView)findViewById(R.id.grey);
-        grey.setOnClickListener(this);
-        green = (TextView)findViewById(R.id.green);
-        green.setOnClickListener(this);
-        blue = (TextView)findViewById(R.id.blue);
-        blue.setOnClickListener(this);
-        black = (TextView)findViewById(R.id.black);
-        black.setOnClickListener(this);
-        purple = (TextView)findViewById(R.id.purple);
-        purple.setOnClickListener(this);
-        red = (TextView)findViewById(R.id.red);
-        red.setOnClickListener(this);
-        lightred = (TextView)findViewById(R.id.lightred);
-        lightred.setOnClickListener(this);
-        orange = (TextView)findViewById(R.id.orange);
-        orange.setOnClickListener(this);
+        GridView g = (GridView)findViewById(R.id.grid_color);
+        g.setAdapter(new ColorAdapter(this));
+        g.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                ColorAdapter colorAdapter = (ColorAdapter)adapterView.getAdapter();
+                int color = colorAdapter.getItem(i);
+                setColorText(color);
+            }
+        });
     }
     private void chooseAvatar() {
         DialogFragment newFragment = new AvatarDialog();
@@ -337,27 +334,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     public void onClick(View view) {
         int id = view.getId();
         switch(id){
-            case R.id.grey:
-                setColorText(view);
-                break;
-            case R.id.black:
-                setColorText(view);
-                break;
-            case R.id.blue:
-                setColorText(view);
-                break;
-            case R.id.red:
-                setColorText(view);
-                break;
-            case R.id.lightred:
-                setColorText(view);
-                break;
-            case R.id.green:
-                setColorText(view);
-                break;
-            case R.id.purple:
-                setColorText(view);
-                break;
             case R.id.button_enter:
                 updateUser();
                 break;
@@ -367,14 +343,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         }
     }
 
-    private void setColorText(View v){
-        int color = Color.BLACK;
-        Drawable background = v.getBackground();
-        if (background instanceof ColorDrawable)
-            color = ((ColorDrawable) background).getColor();
+    private void setColorText(int color){
         nick.setTextColor(color);
         user.setColor(color);
-        myRef.child("users").child(user.getUid()).child("color").setValue(color);
     }
 
     @Override

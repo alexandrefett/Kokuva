@@ -22,8 +22,8 @@ public class UserViewHolder extends RecyclerView.ViewHolder implements View.OnCl
         super(itemView);
         itemView.setOnClickListener(this);
         this.context = context;
-        name = (TextView)itemView.findViewById(R.id.item_list_displayname);
-        picture = (CircleImageView) itemView.findViewById(R.id.item_list_photo);
+        name = (TextView)itemView.findViewById(R.id.tab_user_nick);
+        picture = (CircleImageView) itemView.findViewById(R.id.tab_user_image);
     }
 
     @Override

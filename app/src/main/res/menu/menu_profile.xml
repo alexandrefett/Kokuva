@@ -2,8 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/tools"
-        android:icon="@drawable/ic_action_overflow"
-        app:showAsAction="always"
-        android:title="Photos"/>
+        android:id="@+id/nav_room"
+        android:icon="@drawable/ic_action_users"
+        android:title="Pessoas próximas" />
+    <item
+        android:id="@+id/nav_distance"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:title="Distância" />
+    <item
+        android:id="@+id/nav_chats"
+        android:icon="@drawable/ic_question_answer"
+        android:title="Distância" />
 </menu>

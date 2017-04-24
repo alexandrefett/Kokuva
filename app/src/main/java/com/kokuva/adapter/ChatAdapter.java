@@ -1,13 +1,9 @@
 package com.kokuva.adapter;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import com.bumptech.glide.Glide;
 import com.kokuva.R;
@@ -35,7 +31,7 @@ public class ChatAdapter extends RecyclerView.Adapter<UserViewHolder>{
 
     @Override
     public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
-        View view = LayoutInflater.from(context).inflate(R.layout.item_list_user, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.tab_user, parent, false);
         UserViewHolder viewHolder = new UserViewHolder(context, view);
         return viewHolder;
     }

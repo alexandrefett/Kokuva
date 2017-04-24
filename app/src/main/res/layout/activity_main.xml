@@ -37,70 +37,14 @@
         android:ems="10"
         android:inputType="textPersonName" />
 
-    <GridLayout
-        android:layout_width="wrap_content"
+    <GridView
+        android:id="@+id/grid_color"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:background="@color/common_google_signin_btn_text_dark_focused"
-        android:columnCount="4"
-        android:padding="1dp"
-        android:rowCount="2">
-
-        <TextView
-            android:id="@+id/grey"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:background="@android:color/darker_gray" />
-
-        <TextView
-            android:id="@+id/green"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:background="@android:color/holo_green_dark" />
-
-        <TextView
-            android:id="@+id/red"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:background="@android:color/holo_red_dark" />
-
-        <TextView
-            android:id="@+id/blue"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:background="@android:color/holo_blue_dark" />
-
-        <TextView
-            android:id="@+id/purple"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:background="@android:color/holo_purple" />
-
-        <TextView
-            android:id="@+id/lightred"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:background="@android:color/holo_red_light" />
-
-        <TextView
-            android:id="@+id/orange"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:background="@android:color/holo_orange_light" />
-
-        <TextView
-            android:id="@+id/black"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_weight="1" />
-    </GridLayout>
+        android:gravity="center"
+        android:numColumns="4"
+        android:padding="1dp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
