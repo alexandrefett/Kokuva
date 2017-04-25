@@ -13,6 +13,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.kokuva.adapter.ChatAdapter;
 import com.kokuva.model.KokuvaUser;
@@ -39,15 +40,11 @@ public class FragmentUsers extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view =  inflater.inflate(R.layout.fragment_users, container, false);
+        View view =  inflater.inflate(R.layout.fragment_room, container, false);
 
-        RecyclerView list_users = (RecyclerView)view.findViewById(R.id.users_chat);
+        RecyclerView list_users = (RecyclerView)view.findViewById(R.id.users_list);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-
-        list_users.setLayoutManager(layoutManager);
-        //list_users.setLayoutManager(new LinearLayoutManager(getContext()));
-
+        list_users.setLayoutManager(new LinearLayoutManager(getContext()));
         chatAdapter = new ChatAdapter(getContext(), new ArrayList<KokuvaUser>());
         list_users.setAdapter(chatAdapter);
 
@@ -61,7 +58,9 @@ public class FragmentUsers extends BaseFragment {
     }
 
     private void firebaseUserOnline(){
-        myRef.child("users").child(user.getUid()).child("chats").addChildEventListener(new ChildEventListener() {
+        Query query = myRef.child("users").child(user.getUid()).child("chats");
+
+        query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG,"chats");
