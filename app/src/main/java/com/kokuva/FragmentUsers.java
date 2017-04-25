@@ -16,6 +16,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.kokuva.adapter.ChatAdapter;
+import com.kokuva.model.Chat;
 import com.kokuva.model.KokuvaUser;
 
 import java.util.ArrayList;
@@ -45,10 +46,9 @@ public class FragmentUsers extends BaseFragment {
         RecyclerView list_users = (RecyclerView)view.findViewById(R.id.users_list);
 
         list_users.setLayoutManager(new LinearLayoutManager(getContext()));
-        chatAdapter = new ChatAdapter(getContext(), new ArrayList<KokuvaUser>());
+        chatAdapter = new ChatAdapter(getContext(), new ArrayList<Chat>());
         list_users.setAdapter(chatAdapter);
 
-        firebaseUserOnline();
         return view;
     }
 
@@ -57,25 +57,22 @@ public class FragmentUsers extends BaseFragment {
         super.onStart();
     }
 
-    private void firebaseUserOnline(){
-        Query query = myRef.child("users").child(user.getUid()).child("chats");
+    @Override
+    public void onResume() {
+        super.onResume();
+        firebaseUserOnline();
+    }
 
-        query.addChildEventListener(new ChildEventListener() {
+    private void firebaseUserOnline(){
+        Log.d(TAG,"start query listener");
+        myRef.child("chats").child(user.getUid()).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG,"chats");
                 Log.d(TAG,"String: "+s);
                 Log.d(TAG,"dataSnap: "+dataSnapshot.toString());
-                String uid = dataSnapshot.getValue(String.class);
-                myRef.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        chatAdapter.addItem(dataSnapshot.getValue(KokuvaUser.class));
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {   }
-                });
+                chatAdapter.addItem(dataSnapshot.getValue(Chat.class));
+                KokuvaApp.getInstance().getChats().add(dataSnapshot.getValue(Chat.class));
             }
 
             @Override
@@ -83,7 +80,6 @@ public class FragmentUsers extends BaseFragment {
                 Log.d(TAG,"onChildChanged: ");
                 Log.d(TAG,"String: "+s);
                 Log.d(TAG,"dataSnap: "+dataSnapshot.toString());
-
             }
 
             @Override

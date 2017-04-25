@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class Chat {
 
     private String chatId;
-    private ArrayList<KokuvaUser> users = new ArrayList<KokuvaUser>();
+    private KokuvaUser user;
 
     public String getChatId() {
         return chatId;
@@ -19,16 +19,19 @@ public class Chat {
         this.chatId = chatId;
     }
 
-    public ArrayList<KokuvaUser> getUsers() {
-        return users;
+    public KokuvaUser getUser() {
+        return user;
     }
 
-    public void setUsers(ArrayList<KokuvaUser> users) {
-        this.users = users;
+    public void setUser(KokuvaUser user) {
+        this.user = user;
     }
 
     public Chat(){
     }
 
-
+    public Chat(String cid, KokuvaUser k){
+        chatId = cid;
+        user = k;
+    }
 }

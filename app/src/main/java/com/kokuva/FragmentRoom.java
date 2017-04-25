@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,6 +25,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.kokuva.adapter.FirebaseUsersAdapter;
+import com.kokuva.model.Chat;
 import com.kokuva.model.KokuvaUser;
 
 import java.util.ArrayList;
@@ -144,23 +146,28 @@ public class FragmentRoom extends BaseFragment {
             @Override
             public void onItemClick(KokuvaUser item) {
 
-
-            String chatId = myRef.child("chats").push().getKey();
-
-            Map<String, Object> data = new HashMap<String, Object>();
-            data.put("chats/"+chatId+"/"+user.getUid(), true);
-            data.put("chats/"+chatId+"/"+item.getUid(), true);
-            data.put("users/"+user.getUid()+"/chats/"+item.getUid(),chatId);
-            data.put("users/"+item.getUid()+"/chats/"+user.getUid(), chatId);
-
-            myRef.updateChildren(data);
-
+                createChat(item);
             }
         });
         RecyclerView.LayoutManager lm = new GridLayoutManager(getContext(),2);
         list_users.setLayoutManager(lm);
         list_users.setAdapter(userAdapter);
 
+    }
+
+    private void createChat(KokuvaUser item){
+        if(KokuvaApp.getInstance().getUserChat(item.getUid())==null){
+            String chatId = myRef.child("chats").push().getKey();
+            Chat chatMe = new Chat(chatId, user);
+            Chat chatOther = new Chat(chatId, item);
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("chats/"+user.getUid()+"/"+chatId, chatOther);
+            data.put("chats/"+item.getUid()+"/"+chatId, chatMe);
+            myRef.updateChildren(data);
+        }
+        else {
+            Log.d(TAG, "Chat exist");
+        }
     }
 
     @Override

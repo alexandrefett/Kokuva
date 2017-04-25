@@ -9,6 +9,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -36,8 +37,10 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.kokuva.adapter.ChatAdapter;
 import com.kokuva.adapter.ImageAdapter;
+import com.kokuva.adapter.ViewPagerAdapter;
 import com.kokuva.dialogs.AvatarDialog;
 import com.kokuva.dialogs.DistanceDialog;
+import com.kokuva.model.Chat;
 import com.kokuva.model.KokuvaUser;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +51,7 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     private DatabaseReference myRef;
     private KokuvaUser user;
     private Toolbar toolbar;
+    private ViewPager pager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +65,28 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
 
-        swapFragment(FragmentRoom.class);
+        pager = (ViewPager)findViewById(R.id.pager);
+        setupViewPager();
+    }
+
+    private void setupViewPager(){
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        adapter.addFragment(addFragment(FragmentRoom.class),"room");
+        adapter.addFragment(addFragment(FragmentUsers.class),"users");
+        pager.setAdapter(adapter);
+    }
+
+    private Fragment addFragment(Class t){
+        Fragment fragment = null;
+        Class fragmentClass = t;
+
+        try {
+            fragment = (Fragment) fragmentClass.newInstance();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return fragment;
     }
 
     @Override
@@ -75,13 +100,13 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.nav_room:
-                swapFragment(FragmentRoom.class);
+                pager.setCurrentItem(0);
                 break;
             case R.id.nav_distance:
                 setDistance();
                 break;
             case R.id.nav_chats:
-                swapFragment(FragmentChat.class);
+                pager.setCurrentItem(1);
                 break;
             case android.R.id.home:
                 return true;
@@ -89,23 +114,14 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         return super.onOptionsItemSelected(item);
     }
 
-    private void swapFragment(Class t){
-        Fragment fragment = null;
-        Class fragmentClass = t;
-
-        try {
-            fragment = (Fragment) fragmentClass.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
-    }
 
     @Override
     public void onStop(){
         super.onStop();
+        myRef.child("chats").child(user.getUid()).removeValue();
+        for(Chat c:KokuvaApp.getInstance().getChats()){
+            myRef.child("chats").child(c.getUser().getUid()).child(c.getChatId()).removeValue();
+        }
         myRef.child("users").child(user.getUid()).child("lat").removeValue();
         myRef.child("users").child(user.getUid()).child("log").removeValue();
     }

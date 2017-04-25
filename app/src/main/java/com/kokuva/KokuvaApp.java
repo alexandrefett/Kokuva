@@ -6,7 +6,12 @@ import android.content.Context;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.kokuva.model.Chat;
 import com.kokuva.model.KokuvaUser;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Alexandre on 19/09/2016.
@@ -16,6 +21,7 @@ public class KokuvaApp extends Application {
 
     private Context context;
     private KokuvaUser user;
+    private ArrayList<Chat> chats = new ArrayList<Chat>();
     public KokuvaUser getUser() {
         return user;
     }
@@ -30,6 +36,23 @@ public class KokuvaApp extends Application {
     public void onCreate() {
         super.onCreate();
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+    }
+
+    public String getUserChat(String user){
+        for(Chat c:chats){
+            if(c.getUser().getUid().equals(user)){
+                return c.getChatId();
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<Chat> getChats() {
+        return chats;
+    }
+
+    public void setChats(ArrayList<Chat> chats) {
+        this.chats = chats;
     }
 
     public Context getContext() {
@@ -53,11 +76,5 @@ public class KokuvaApp extends Application {
     }
 
     private static boolean chatActivity;
-
-    public void addChat(String uidTo){
-        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
-        myRef.child("users").child(uidTo).setValue("chat/"+user.getUid());
-    }
-
 
 }
