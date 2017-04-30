@@ -9,21 +9,19 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.bumptech.glide.Glide;
 import com.google.firebase.database.Query;
 import com.kokuva.R;
-import com.kokuva.model.KokuvaUser;
-
+import com.kokuva.model.Chat;
 import java.util.ArrayList;
 
 /**
  * Created by Alexandre on 22/07/2016.
  */
-public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersAdapter.UserViewHolder, KokuvaUser>{
+public class FirebaseChatsAdapter extends FirebaseRecyclerAdapter<FirebaseChatsAdapter.UserViewHolder, Chat>{
 
     public interface OnItemClickListener {
-        void onItemClick(KokuvaUser item);
+        void onItemClick(Chat item);
     }
 
     public static class UserViewHolder extends RecyclerView.ViewHolder{
@@ -42,7 +40,7 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
     private Context context;
     private OnItemClickListener listener;
 
-    public FirebaseUsersAdapter(Query query, Class<KokuvaUser> itemClass, @Nullable ArrayList<KokuvaUser> items,
+    public FirebaseChatsAdapter(Query query, Class<Chat> itemClass, @Nullable ArrayList<Chat> items,
                                 @Nullable ArrayList<String> keys) {
         super(query, itemClass, items, keys);
     }
@@ -64,37 +62,37 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
 
     @Override
     public void onBindViewHolder(final UserViewHolder viewHolder, final int position){
-        final KokuvaUser user = getItem(position);
+        final Chat chat = getItem(position);
 
         viewHolder.v.setOnClickListener(null);
-        viewHolder.nick.setText(user.getNick());
-        viewHolder.nick.setTextColor(user.getColor());
+        viewHolder.nick.setText(chat.getUserTo().getNick());
+        viewHolder.nick.setTextColor(chat.getUserTo().getColor());
         viewHolder.v.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.onItemClick(user);
+                listener.onItemClick(chat);
             }
         });
-        if(user.isPhoto())
+        if(chat.getUserTo().isPhoto())
             Glide.with(context)
-                    .load(user.getUrl())
+                    .load(chat.getUserTo().getUrl())
                     .into(viewHolder.image);
         else
-            viewHolder.image.setImageResource(context.getResources().getIdentifier(user.getUrl(), "drawable", context.getPackageName()));
+            viewHolder.image.setImageResource(context.getResources().getIdentifier(chat.getUserTo().getUrl(), "drawable", context.getPackageName()));
 
     }
 
 
     @Override
-    protected void itemAdded(KokuvaUser item, String key, int position) {    }
+    protected void itemAdded(Chat item, String key, int position) {    }
 
     @Override
-    protected void itemChanged(KokuvaUser oldItem, KokuvaUser newItem, String key, int position) {    }
+    protected void itemChanged(Chat oldItem, Chat newItem, String key, int position) {    }
 
     @Override
-    protected void itemRemoved(KokuvaUser item, String key, int position) {    }
+    protected void itemRemoved(Chat item, String key, int position) {    }
 
     @Override
-    protected void itemMoved(KokuvaUser item, String key, int oldPosition, int newPosition) {    }
+    protected void itemMoved(Chat item, String key, int oldPosition, int newPosition) {    }
 
 }

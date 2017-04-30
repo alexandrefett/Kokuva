@@ -9,7 +9,15 @@ import java.util.ArrayList;
 public class Chat {
 
     private String chatId;
-    private ArrayList<KokuvaUser> users = new ArrayList<KokuvaUser>();
+    private KokuvaUser userTo;
+
+    public KokuvaUser getUserTo() {
+        return userTo;
+    }
+
+    public void setUserTo(KokuvaUser userTo) {
+        this.userTo = userTo;
+    }
 
     public String getChatId() {
         return chatId;
@@ -19,15 +27,12 @@ public class Chat {
         this.chatId = chatId;
     }
 
-    public ArrayList<KokuvaUser> getUsers() {
-        return users;
-    }
-
-    public void setUsers(ArrayList<KokuvaUser> users) {
-        this.users = users;
-    }
-
     public Chat(){
+    }
+
+    public Chat(String chatId, KokuvaUser user){
+        this.userTo = user;
+        this.chatId = chatId;
     }
 
 

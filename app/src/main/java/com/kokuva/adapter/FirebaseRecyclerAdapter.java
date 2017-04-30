@@ -63,6 +63,7 @@ public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.Vi
     private ChildEventListener mListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+
             String key = dataSnapshot.getKey();
 
             if (!mKeys.contains(key)) {

@@ -61,7 +61,7 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
 
-        swapFragment(FragmentRoom.class);
+        swapFragment(FragmentRoom.getInstance(null));
     }
 
     @Override
@@ -75,13 +75,13 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.nav_room:
-                swapFragment(FragmentRoom.class);
+                swapFragment(FragmentRoom.getInstance(null));
                 break;
             case R.id.nav_distance:
                 setDistance();
                 break;
             case R.id.nav_chats:
-                swapFragment(FragmentChat.class);
+                swapFragment(FragmentUsers.getInstance(null));
                 break;
             case android.R.id.home:
                 return true;
@@ -89,18 +89,11 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         return super.onOptionsItemSelected(item);
     }
 
-    private void swapFragment(Class t){
-        Fragment fragment = null;
-        Class fragmentClass = t;
-
-        try {
-            fragment = (Fragment) fragmentClass.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//    private void swapFragment(Class t){
+    private void swapFragment(Fragment t){
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.flContent, t).commit();
     }
 
     @Override

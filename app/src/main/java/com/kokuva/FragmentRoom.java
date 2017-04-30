@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,16 +39,18 @@ public class FragmentRoom extends BaseFragment {
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
     private RecyclerView list_users;
+    private static FragmentRoom ourInstance;
 
-    public static FragmentRoom newInstance(String value) {
-        FragmentRoom myFragment = new FragmentRoom();
-
-        if(value!=null) {
-            Bundle args = new Bundle();
-            args.putString("value", value);
-            myFragment.setArguments(args);
+    public static FragmentRoom getInstance(String value) {
+        if (ourInstance == null) {
+            ourInstance = new FragmentRoom();
+            if (value != null) {
+                Bundle args = new Bundle();
+                args.putString("value", value);
+                ourInstance.setArguments(args);
+            }
         }
-        return myFragment;
+        return ourInstance;
     }
 
     @Override
@@ -67,7 +70,7 @@ public class FragmentRoom extends BaseFragment {
                              Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.fragment_room, container, false);
 
-        list_users = (RecyclerView)view.findViewById(R.id.users_list);
+        list_users = (RecyclerView)view.findViewById(R.id.room_users_list);
 
         getLocation();
 
@@ -79,24 +82,17 @@ public class FragmentRoom extends BaseFragment {
         mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(final Location location) {
-                Log.d(TAG, "onLocationChanged: " + location.getLatitude());
                 updateLocation(location);
             }
 
             @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
-                Log.d(TAG, "onStatusChanged: " + s);
-            }
+            public void onStatusChanged(String s, int i, Bundle bundle) {      }
 
             @Override
-            public void onProviderEnabled(String s) {
-                Log.d(TAG, "onProviderEnabled: " + s);
-            }
+            public void onProviderEnabled(String s) {     }
 
             @Override
-            public void onProviderDisabled(String s) {
-                Log.d(TAG, "onProviderDisabled: " + s);
-            }
+            public void onProviderDisabled(String s) {         }
         };
 
         if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -117,10 +113,10 @@ public class FragmentRoom extends BaseFragment {
         data.put("users/"+user.getUid()+"/log", user.getLog());
 
         myRef.updateChildren(data).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-            hideDialog();
-            getUsers();
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                hideDialog();
+                getUsers();
             }
         })
         .addOnFailureListener(new OnFailureListener() {
@@ -133,33 +129,29 @@ public class FragmentRoom extends BaseFragment {
     }
 
     private void getUsers(){
-
         ArrayList<KokuvaUser> users = new ArrayList<KokuvaUser>();
         ArrayList<String> usersKeys = new ArrayList<String>();
-        Query recentPostsQuery = myRef.child("users");
+        Query query = myRef.child("users");
 
-        FirebaseUsersAdapter userAdapter = new FirebaseUsersAdapter(recentPostsQuery, KokuvaUser.class, users, usersKeys);
+        FirebaseUsersAdapter userAdapter = new FirebaseUsersAdapter(query, KokuvaUser.class, users, usersKeys);
         userAdapter.setContext(getContext());
         userAdapter.addOnClickItemListener(new FirebaseUsersAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(KokuvaUser item) {
 
-
             String chatId = myRef.child("chats").push().getKey();
 
             Map<String, Object> data = new HashMap<String, Object>();
-            data.put("chats/"+chatId+"/"+user.getUid(), true);
-            data.put("chats/"+chatId+"/"+item.getUid(), true);
-            data.put("users/"+user.getUid()+"/chats/"+item.getUid(),chatId);
-            data.put("users/"+item.getUid()+"/chats/"+user.getUid(), chatId);
+                data.put("chats/"+user.getUid()+"/"+chatId+"/"+item.getUid(), item);
+                data.put("chats/"+item.getUid()+"/"+chatId+"/"+user.getUid(), user);
 
             myRef.updateChildren(data);
 
             }
         });
         RecyclerView.LayoutManager lm = new GridLayoutManager(getContext(),2);
-        list_users.setLayoutManager(lm);
         list_users.setAdapter(userAdapter);
+        list_users.setLayoutManager(lm);
 
     }
 

@@ -1,6 +1,7 @@
 package com.kokuva;
 
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -16,14 +17,32 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.kokuva.adapter.ChatAdapter;
+import com.kokuva.adapter.FirebaseChatsAdapter;
+import com.kokuva.adapter.FirebaseUsersAdapter;
+import com.kokuva.model.Chat;
 import com.kokuva.model.KokuvaUser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FragmentUsers extends BaseFragment {
     private DatabaseReference myRef;
     private KokuvaUser user;
-    private ChatAdapter chatAdapter;
+    private static FragmentUsers ourInstance;
+    private RecyclerView chats_list;
+
+    public static FragmentUsers getInstance(String value) {
+        if (ourInstance == null) {
+            ourInstance = new FragmentUsers();
+            if (value != null) {
+                Bundle args = new Bundle();
+                args.putString("value", value);
+                ourInstance.setArguments(args);
+            }
+        }
+        return ourInstance;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,15 +59,9 @@ public class FragmentUsers extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view =  inflater.inflate(R.layout.fragment_room, container, false);
-
-        RecyclerView list_users = (RecyclerView)view.findViewById(R.id.users_list);
-
-        list_users.setLayoutManager(new LinearLayoutManager(getContext()));
-        chatAdapter = new ChatAdapter(getContext(), new ArrayList<KokuvaUser>());
-        list_users.setAdapter(chatAdapter);
-
-        firebaseUserOnline();
+        View view =  inflater.inflate(R.layout.fragment_users, container, false);
+        chats_list = (RecyclerView)view.findViewById(R.id.chats_list);
+        listenMyChats();
         return view;
     }
 
@@ -57,50 +70,23 @@ public class FragmentUsers extends BaseFragment {
         super.onStart();
     }
 
-    private void firebaseUserOnline(){
-        Query query = myRef.child("users").child(user.getUid()).child("chats");
+    private void listenMyChats(){
+        ArrayList<Chat> users = new ArrayList<Chat>();
+        ArrayList<String> usersKeys = new ArrayList<String>();
 
-        query.addChildEventListener(new ChildEventListener() {
+        Query query = myRef.child("chats").child(user.getUid());
+
+        FirebaseChatsAdapter userAdapter = new FirebaseChatsAdapter(query, Chat.class, users, usersKeys);
+        userAdapter.setContext(getContext());
+        userAdapter.addOnClickItemListener(new FirebaseChatsAdapter.OnItemClickListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d(TAG,"chats");
-                Log.d(TAG,"String: "+s);
-                Log.d(TAG,"dataSnap: "+dataSnapshot.toString());
-                String uid = dataSnapshot.getValue(String.class);
-                myRef.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        chatAdapter.addItem(dataSnapshot.getValue(KokuvaUser.class));
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {   }
-                });
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.d(TAG,"onChildChanged: ");
-                Log.d(TAG,"String: "+s);
-                Log.d(TAG,"dataSnap: "+dataSnapshot.toString());
+            public void onItemClick(Chat item) {
 
             }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Log.d(TAG,"onChildRemoved: ");
-                Log.d(TAG,"dataSnap: "+dataSnapshot.toString());
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                Log.d(TAG,"onChildMoved: ");
-                Log.d(TAG,"String: "+s);
-                Log.d(TAG,"dataSnap: "+dataSnapshot.toString());
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {  }
         });
+        RecyclerView.LayoutManager lm = new GridLayoutManager(getContext(),2);
+        chats_list.setAdapter(userAdapter);
+        chats_list.setLayoutManager(lm);
+
     }
 }
