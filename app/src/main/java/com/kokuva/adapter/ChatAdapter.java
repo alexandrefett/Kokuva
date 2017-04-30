@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.bumptech.glide.Glide;
 import com.kokuva.R;
+import com.kokuva.model.Chat;
 import com.kokuva.model.KokuvaUser;
 import java.util.ArrayList;
 
@@ -16,38 +17,38 @@ import java.util.ArrayList;
 public class ChatAdapter extends RecyclerView.Adapter<UserViewHolder>{
     
     private Context context;
-    private ArrayList<KokuvaUser> array;
+    private ArrayList<Chat> array;
     private int position;
 
-    public ChatAdapter(Context c, ArrayList<KokuvaUser> p){
+    public ChatAdapter(Context c, ArrayList<Chat> p){
         this.context = c;
         this.array = p;
     }
 
-    public void addItem(KokuvaUser k){
+    public void addItem(Chat k){
         array.add(k);
         notifyDataSetChanged();
     }
 
     @Override
     public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
-        View view = LayoutInflater.from(context).inflate(R.layout.tab_user, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_list_user, parent, false);
         UserViewHolder viewHolder = new UserViewHolder(context, view);
         return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(final UserViewHolder viewHolder, final int position){
-        final KokuvaUser u = array.get(position);
-        if(u.isPhoto())
+        final Chat u = array.get(position);
+        if(u.getUser().isPhoto())
             Glide.with(context)
-                    .load(u.getUrl())
+                    .load(u.getUser().getUrl())
                     .into(viewHolder.picture);
         else
-            viewHolder.picture.setImageResource(context.getResources().getIdentifier(u.getUrl(), "drawable", context.getPackageName()));
+            viewHolder.picture.setImageResource(context.getResources().getIdentifier(u.getUser().getUrl(), "drawable", context.getPackageName()));
 
-        viewHolder.name.setText(u.getNick());
-        viewHolder.name.setTextColor(u.getColor());
+        viewHolder.name.setText(u.getUser().getNick());
+        viewHolder.name.setTextColor(u.getUser().getColor());
         this.position = position;
     }
 
@@ -60,7 +61,7 @@ public class ChatAdapter extends RecyclerView.Adapter<UserViewHolder>{
         return array.size();
     }
 
-    public ArrayList<KokuvaUser> getData(){
+    public ArrayList<Chat> getData(){
         return array;
     }
 }
