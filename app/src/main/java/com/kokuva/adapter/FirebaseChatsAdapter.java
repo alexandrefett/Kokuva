@@ -31,8 +31,8 @@ public class FirebaseChatsAdapter extends FirebaseRecyclerAdapter<FirebaseChatsA
 
         public UserViewHolder (View itemView){
             super(itemView);
-            nick = (TextView) itemView.findViewById(R.id.room_item_nick);
-            image = (ImageView) itemView.findViewById(R.id.room_item_image);
+            nick = (TextView) itemView.findViewById(R.id.chat_item_nick);
+            image = (ImageView) itemView.findViewById(R.id.chat_item_image);
             v = itemView;
         }
     }
@@ -55,7 +55,7 @@ public class FirebaseChatsAdapter extends FirebaseRecyclerAdapter<FirebaseChatsA
     @Override
     public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.room_item_user, parent, false);
+                .inflate(R.layout.chat_item_user, parent, false);
         UserViewHolder viewHolder = new UserViewHolder(view);
         return viewHolder;
     }

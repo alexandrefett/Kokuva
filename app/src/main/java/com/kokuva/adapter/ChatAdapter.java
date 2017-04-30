@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import com.bumptech.glide.Glide;
 import com.kokuva.R;
 import com.kokuva.model.Chat;
-import com.kokuva.model.KokuvaUser;
+
 import java.util.ArrayList;
 
 /**
@@ -32,7 +32,7 @@ public class ChatAdapter extends RecyclerView.Adapter<UserViewHolder>{
 
     @Override
     public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
-        View view = LayoutInflater.from(context).inflate(R.layout.item_list_user, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.chat_item_user, parent, false);
         UserViewHolder viewHolder = new UserViewHolder(context, view);
         return viewHolder;
     }

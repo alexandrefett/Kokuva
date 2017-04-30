@@ -23,7 +23,7 @@ public class UserViewHolder extends RecyclerView.ViewHolder implements View.OnCl
         itemView.setOnClickListener(this);
         this.context = context;
         name = (TextView)itemView.findViewById(R.id.item_list_displayname);
-        picture = (CircleImageView) itemView.findViewById(R.id.item_list_photo);
+        picture = (CircleImageView) itemView.findViewById(R.id.chat_item_image);
     }
 
     @Override
