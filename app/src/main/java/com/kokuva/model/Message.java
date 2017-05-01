@@ -27,6 +27,10 @@ public class Message {
 
     public Message(){
     }
+    public Message(String msg, String sender){
+        this.message = msg;
+        this.sender = sender;
+    }
 
 
 }

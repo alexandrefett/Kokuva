@@ -78,7 +78,8 @@ public class FirebaseChatsAdapter extends FirebaseRecyclerAdapter<FirebaseChatsA
                     .load(chat.getUserTo().getUrl())
                     .into(viewHolder.image);
         else
-            viewHolder.image.setImageResource(context.getResources().getIdentifier(chat.getUserTo().getUrl(), "drawable", context.getPackageName()));
+            viewHolder.image.setImageResource(context.getResources()
+                    .getIdentifier(chat.getUserTo().getUrl(), "drawable", context.getPackageName()));
 
     }
 

@@ -2,7 +2,6 @@ package com.kokuva;
 
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,16 +14,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-import com.kokuva.adapter.ChatAdapter;
 import com.kokuva.adapter.FirebaseChatsAdapter;
-import com.kokuva.adapter.FirebaseUsersAdapter;
 import com.kokuva.model.Chat;
 import com.kokuva.model.KokuvaUser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FragmentUsers extends BaseFragment {
     private DatabaseReference myRef;

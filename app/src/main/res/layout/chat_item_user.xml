@@ -30,7 +30,7 @@
         android:padding="3dp"
         android:text="DisplayName"
         android:textColor="@color/common_google_signin_btn_text_light_focused"
-        android:textSize="24sp" />
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/chat_item_num"

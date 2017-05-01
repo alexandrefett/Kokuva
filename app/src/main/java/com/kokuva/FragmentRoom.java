@@ -25,6 +25,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.kokuva.adapter.FirebaseUsersAdapter;
+import com.kokuva.model.Chat;
 import com.kokuva.model.KokuvaUser;
 
 import java.util.ArrayList;
@@ -140,10 +141,11 @@ public class FragmentRoom extends BaseFragment {
             public void onItemClick(KokuvaUser item) {
 
             String chatId = myRef.child("chats").push().getKey();
-
+                Chat c1 = new Chat(chatId, user);
+                Chat c2 = new Chat(chatId, item);
             Map<String, Object> data = new HashMap<String, Object>();
-                data.put("chats/"+user.getUid()+"/"+chatId+"/"+item.getUid(), item);
-                data.put("chats/"+item.getUid()+"/"+chatId+"/"+user.getUid(), user);
+                data.put("chats/"+user.getUid()+"/"+item.getUid(), c1);
+                data.put("chats/"+item.getUid()+"/"+user.getUid(), c2);
 
             myRef.updateChildren(data);
 
