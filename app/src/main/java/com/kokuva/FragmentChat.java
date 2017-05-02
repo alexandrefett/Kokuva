@@ -1,6 +1,7 @@
 package com.kokuva;
 
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.kokuva.model.KokuvaUser;
 import com.kokuva.model.Message;
+import com.kokuva.views.MessageView;
+import com.kokuva.views.ReceiverMsgView;
+import com.kokuva.views.SenderMsgView;
 
 public class FragmentChat extends BaseFragment {
 
@@ -33,9 +37,17 @@ public class FragmentChat extends BaseFragment {
     private LinearLayout scroll_messages;
 
     private void viewMessage(Message m){
-        TextView t = new TextView(getContext());
+        MessageView t;
+        if(m.getSender().equals(user.getUid())){
+            t = new MessageView(getContext(), R.drawable.sender_msg_layout, Gravity.RIGHT);
+        }
+        else {
+            t = new MessageView(getContext(), R.drawable.receiver_msg_layout, Gravity.LEFT);
+        }
         t.setText(m.getMessage());
         scroll_messages.addView(t);
+        t.requestFocus();
+        text_msg.requestFocus();
     }
 
     private void listenMessages(){
@@ -47,17 +59,16 @@ public class FragmentChat extends BaseFragment {
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {            }
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {           }
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {         }
+            public void onCancelled(DatabaseError databaseError) { }
         });
 
     }
@@ -117,6 +128,7 @@ public class FragmentChat extends BaseFragment {
                 String t = text_msg.getText().toString().trim();
                 if(t.length()>0){
                     sendMsg(t);
+                    text_msg.setText("");
                 }
             }
         });

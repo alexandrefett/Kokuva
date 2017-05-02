@@ -1,10 +1,12 @@
 package com.kokuva;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -70,26 +72,18 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         switch(item.getItemId()) {
             case R.id.nav_room:
                 pager.setCurrentItem(0);
-//                swapFragment(FragmentRoom.getInstance(null));
                 break;
             case R.id.nav_distance:
                 setDistance();
                 break;
             case R.id.nav_chats:
                 pager.setCurrentItem(1);
-                //swapFragment(FragmentUsers.getInstance(null));
                 break;
             case android.R.id.home:
+
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-//    private void swapFragment(Class t){
-    private void swapFragment(Fragment t){
-
-        //FragmentManager fragmentManager = getSupportFragmentManager();
-        //fragmentManager.beginTransaction().replace(R.id.flContent, t).commit();
     }
 
     private void listenMyChats(){
@@ -129,11 +123,25 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         });
     }
 
+    private void endChatDialog(final Chat c){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(c.getUserTo().getNick()+" saiu da conversa.")
+                .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // end chat
+                    }
+                });
+        builder.setTitle("Mensagem");
+        builder.show();
+    }
+
     @Override
     public void onStop(){
         super.onStop();
         myRef.child("users").child(user.getUid()).child("lat").removeValue();
         myRef.child("users").child(user.getUid()).child("log").removeValue();
+        myRef.child("chats").child(user.getUid()).removeValue();
+
     }
 
     private void setDistance(){
@@ -141,9 +149,9 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         b.putInt("distance", user.getDist());
         DialogFragment newFragment = new DistanceDialog();
         newFragment.setArguments(b);
-
         newFragment.show(getSupportFragmentManager(), "avatar");
     }
+
     @Override
     public void onDistanceChange(int distance) {
         user.setDist(distance);
