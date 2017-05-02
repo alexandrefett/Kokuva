@@ -23,19 +23,21 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.kokuva.adapter.FirebaseChatsAdapter;
 import com.kokuva.adapter.ViewPagerAdapter;
+import com.kokuva.dialogs.AvatarDialog;
+import com.kokuva.dialogs.ChatsDialog;
 import com.kokuva.dialogs.DistanceDialog;
 import com.kokuva.model.Chat;
 import com.kokuva.model.KokuvaUser;
 
 import java.util.ArrayList;
 
-public class RoomActivity extends BaseActivity implements DistanceDialog.DistanceDialogListener {
+public class RoomActivity extends BaseActivity implements DistanceDialog.DistanceDialogListener, ChatsDialog.ChatDialogListener {
 
     private DatabaseReference myRef;
     private KokuvaUser user;
     private Toolbar toolbar;
-    private ViewPager pager;
-    private ViewPagerAdapter adapter;
+//    private ViewPager pager;
+//    private ViewPagerAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,13 +84,14 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.nav_room:
-                pager.setCurrentItem(0);
+                swapFragment(KokuvaApp.getInstance().getFragment(0));
                 break;
             case R.id.nav_distance:
                 setDistance();
                 break;
             case R.id.nav_chats:
-                pager.setCurrentItem(1);
+                chooseChat();
+ //               pager.setCurrentItem(1);
                 break;
             case android.R.id.home:
 
@@ -97,12 +100,16 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         return super.onOptionsItemSelected(item);
     }
 
+    private void chooseChat() {
+        DialogFragment newFragment = new ChatsDialog();
+        newFragment.show(getSupportFragmentManager(), "chats");
+    }
+
     private void listenMyChats(){
         myRef.child("chats").child(user.getUid()).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Chat c  = dataSnapshot.getValue(Chat.class);
-                if(KokuvaApp.getInstance().fragmentExist()){
                     Bundle b = new Bundle();
                     b.putString("chatid", c.getChatId());
                     b.putString("userid", c.getUserTo().getUid());
@@ -110,8 +117,8 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
                     FragmentChat fragment = new FragmentChat();
                     fragment.setArguments(b);
                     KokuvaApp.getInstance().addFragment(fragment);
-                }
-
+                    KokuvaApp.getInstance().addChat(c);
+                    swapFragment(fragment);
 //                adapter.addFragment(fragment,c.getChatId());
 //                pager.setCurrentItem(pager.getChildCount()-1, true);
             }
@@ -162,6 +169,11 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     @Override
     public void onDistanceChange(int distance) {
         user.setDist(distance);
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        swapFragment(KokuvaApp.getInstance().getFragment(position+1));
     }
 }
 

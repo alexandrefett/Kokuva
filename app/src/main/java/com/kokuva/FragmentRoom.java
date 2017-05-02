@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -141,11 +142,12 @@ public class FragmentRoom extends BaseFragment {
             public void onItemClick(KokuvaUser item) {
 
             String chatId = myRef.child("chats").push().getKey();
-                Chat c1 = new Chat(chatId, user);
-                Chat c2 = new Chat(chatId, item);
+            Chat c1 = new Chat(chatId, user);
+            final Chat c2 = new Chat(chatId, item);
+
             Map<String, Object> data = new HashMap<String, Object>();
-                data.put("chats/"+user.getUid()+"/"+item.getUid(), c2);
-                data.put("chats/"+item.getUid()+"/"+user.getUid(), c1);
+            data.put("chats/"+user.getUid()+"/"+item.getUid(), c2);
+            data.put("chats/"+item.getUid()+"/"+user.getUid(), c1);
 
             myRef.updateChildren(data);
 

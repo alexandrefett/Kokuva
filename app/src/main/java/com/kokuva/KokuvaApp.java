@@ -33,11 +33,20 @@ public class KokuvaApp extends Application {
         return fragments.get(i);
     }
 
-    public void addChatItem(Chat chat){
+    public boolean fragmentExist(Chat c){
+        for(Fragment f:fragments){
+            if(c.getChatId().equals(f.getArguments().getString("chatid"))){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void addChat(Chat chat){
         chats.add(chat);
     }
 
-    public void removeChatItem(Chat chat){
+    public void removeChat(Chat chat){
         DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
         myRef.child("chats").child(user.getUid()).child(chat.getChatId()).removeValue();
         myRef.child("chats").child(chat.getUserTo().getUid()).child(chat.getChatId()).removeValue();
