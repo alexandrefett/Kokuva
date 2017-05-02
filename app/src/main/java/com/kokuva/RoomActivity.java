@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
@@ -44,19 +45,29 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        pager = (ViewPager)findViewById(R.id.pager);
+//        pager = (ViewPager)findViewById(R.id.pager);
 
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
 
-        setupViewPager();
+        setupFragment();
     }
 
-    private void setupViewPager(){
-        adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(FragmentRoom.getInstance(null),"room");
-        adapter.addFragment(FragmentUsers.getInstance(null),"users");
-        pager.setAdapter(adapter);
+    public void swapFragment(Fragment f){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fcontent, f);
+        fragmentTransaction.commit();
+    }
+
+    private void setupFragment(){
+        FragmentRoom r = FragmentRoom.getInstance(null);
+        swapFragment(r);
+        KokuvaApp.getInstance().addFragment(r);
+//        adapter = new ViewPagerAdapter(getSupportFragmentManager());
+//        adapter.addFragment(FragmentRoom.getInstance(null),"room");
+//        adapter.addFragment(FragmentUsers.getInstance(null),"users");
+//        pager.setAdapter(adapter);
         listenMyChats();
     }
 
@@ -91,35 +102,31 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Chat c  = dataSnapshot.getValue(Chat.class);
-                Bundle b = new Bundle();
-                b.putString("chatid", c.getChatId());
-                b.putString("userid", c.getUserTo().getUid());
-                b.putString("nick", c.getUserTo().getNick());
-                FragmentChat fragment = new FragmentChat();
-                fragment.setArguments(b);
-                adapter.addFragment(fragment,c.getChatId());
-                pager.setCurrentItem(pager.getChildCount()-1, true);
+                if(KokuvaApp.getInstance().fragmentExist()){
+                    Bundle b = new Bundle();
+                    b.putString("chatid", c.getChatId());
+                    b.putString("userid", c.getUserTo().getUid());
+                    b.putString("nick", c.getUserTo().getNick());
+                    FragmentChat fragment = new FragmentChat();
+                    fragment.setArguments(b);
+                    KokuvaApp.getInstance().addFragment(fragment);
+                }
+
+//                adapter.addFragment(fragment,c.getChatId());
+//                pager.setCurrentItem(pager.getChildCount()-1, true);
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {         }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
+            public void onChildRemoved(DataSnapshot dataSnapshot) {         }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {        }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            public void onCancelled(DatabaseError databaseError) {       }
         });
     }
 

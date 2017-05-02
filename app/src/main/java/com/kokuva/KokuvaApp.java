@@ -2,6 +2,7 @@ package com.kokuva;
 
 import android.app.Application;
 import android.content.Context;
+import android.support.v4.app.Fragment;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -22,7 +23,15 @@ public class KokuvaApp extends Application {
     private Context context;
     private KokuvaUser user;
     private ArrayList<Chat> chats = new ArrayList<Chat>();
+    private ArrayList<Fragment> fragments = new ArrayList<Fragment>();
 
+    public void addFragment(Fragment f){
+            fragments.add(f);
+    }
+
+    public Fragment getFragment(int i){
+        return fragments.get(i);
+    }
 
     public void addChatItem(Chat chat){
         chats.add(chat);

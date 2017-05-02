@@ -34,16 +34,14 @@ public class MessageView extends AppCompatTextView {
 
     public MessageView(Context context, int resBackground, int align){
         super(context);
-        LinearLayoutCompat.LayoutParams lp = new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.setMargins(MARGIN,MARGIN,MARGIN,MARGIN);
-        setLayoutParams(lp);
-
         setBackgroundResource(resBackground);
         setPadding(PADDING,PADDING,PADDING,PADDING);
         setTextSize(20f);
         setFocusable(true);
         setFocusableInTouchMode(true);
-        setGravity(align);
+        LinearLayoutCompat.LayoutParams lp = new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(MARGIN,MARGIN,MARGIN,MARGIN);
+        setLayoutParams(lp);
     }
 
 

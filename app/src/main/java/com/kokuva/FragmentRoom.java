@@ -144,8 +144,8 @@ public class FragmentRoom extends BaseFragment {
                 Chat c1 = new Chat(chatId, user);
                 Chat c2 = new Chat(chatId, item);
             Map<String, Object> data = new HashMap<String, Object>();
-                data.put("chats/"+user.getUid()+"/"+item.getUid(), c1);
-                data.put("chats/"+item.getUid()+"/"+user.getUid(), c2);
+                data.put("chats/"+user.getUid()+"/"+item.getUid(), c2);
+                data.put("chats/"+item.getUid()+"/"+user.getUid(), c1);
 
             myRef.updateChildren(data);
 

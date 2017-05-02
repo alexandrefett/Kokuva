@@ -1,6 +1,8 @@
 package com.kokuva;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.kokuva.model.Chat;
 import com.kokuva.model.KokuvaUser;
 import com.kokuva.model.Message;
 import com.kokuva.views.MessageView;
@@ -37,12 +40,15 @@ public class FragmentChat extends BaseFragment {
     private LinearLayout scroll_messages;
 
     private void viewMessage(Message m){
-        MessageView t;
+
+        TextView t;
         if(m.getSender().equals(user.getUid())){
-            t = new MessageView(getContext(), R.drawable.sender_msg_layout, Gravity.RIGHT);
+//            t = new MessageView(getContext(), R.drawable.sender_msg_layout, Gravity.RIGHT);
+            t = (TextView)getActivity().getLayoutInflater().inflate(R.layout.text_sender, scroll_messages, false);
         }
         else {
-            t = new MessageView(getContext(), R.drawable.receiver_msg_layout, Gravity.LEFT);
+            t = (TextView)getActivity().getLayoutInflater().inflate(R.layout.text_receiver, scroll_messages, false);
+//            t = new MessageView(getContext(), R.drawable.receiver_msg_layout, Gravity.LEFT);
         }
         t.setText(m.getMessage());
         scroll_messages.addView(t);
@@ -83,10 +89,7 @@ public class FragmentChat extends BaseFragment {
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Toast.makeText(getContext(),nick+" não está mais na conversa.",Toast.LENGTH_LONG).show();
-                text_msg.setEnabled(false);
-                button_send.setEnabled(false);
-            }
+                endChatDialog(nick);            }
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {           }
@@ -94,8 +97,8 @@ public class FragmentChat extends BaseFragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {         }
         });
-
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -141,4 +144,18 @@ public class FragmentChat extends BaseFragment {
     public void onStart() {
         super.onStart();
     }
+
+    private void endChatDialog(final String n){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setMessage(n+" saiu da conversa.")
+            .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    text_msg.setEnabled(false);
+                    button_send.setEnabled(false);
+                }
+            });
+        builder.setTitle("Mensagem");
+        builder.show();
+    }
+
 }

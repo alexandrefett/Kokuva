@@ -65,14 +65,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     private EditText nick;
     private Button enter;
     private KokuvaUser user;
-    private TextView grey;
-    private TextView green;
-    private TextView black;
-    private TextView blue;
-    private TextView red;
-    private TextView lightred;
-    private TextView purple;
-    private TextView orange;
     private static int REQUEST_IMAGE_CAPTURE = 1;
     private static int REQUEST_IMAGE_GALLERY = 2;
     private static int REQUEST_PERMISSIONS = 3;

@@ -69,7 +69,33 @@ public class FragmentUsers extends BaseFragment {
         ArrayList<String> usersKeys = new ArrayList<String>();
 
         Query query = myRef.child("chats").child(user.getUid());
+        query.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG, "snapshot: "+dataSnapshot.toString());
+            }
 
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        Log.d(TAG, "user: "+user.getNick());
         FirebaseChatsAdapter userAdapter = new FirebaseChatsAdapter(query, Chat.class, users, usersKeys);
         userAdapter.setContext(getContext());
         userAdapter.addOnClickItemListener(new FirebaseChatsAdapter.OnItemClickListener() {
