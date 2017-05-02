@@ -141,15 +141,20 @@ public class FragmentRoom extends BaseFragment {
             @Override
             public void onItemClick(KokuvaUser item) {
 
-            String chatId = myRef.child("chats").push().getKey();
-            Chat c1 = new Chat(chatId, user);
-            final Chat c2 = new Chat(chatId, item);
+                if(!KokuvaApp.getInstance().chatExist(item.getUid())) {
+                    String chatId = myRef.child("chats").push().getKey();
+                    Chat c1 = new Chat(chatId, user);
+                    final Chat c2 = new Chat(chatId, item);
 
-            Map<String, Object> data = new HashMap<String, Object>();
-            data.put("chats/"+user.getUid()+"/"+item.getUid(), c2);
-            data.put("chats/"+item.getUid()+"/"+user.getUid(), c1);
+                    Map<String, Object> data = new HashMap<String, Object>();
+                    data.put("chats/" + user.getUid() + "/" + item.getUid(), c2);
+                    data.put("chats/" + item.getUid() + "/" + user.getUid(), c1);
 
-            myRef.updateChildren(data);
+                    myRef.updateChildren(data);
+                }
+                else {
+
+                }
 
             }
         });
@@ -162,10 +167,6 @@ public class FragmentRoom extends BaseFragment {
     @Override
     public void onStart() {
         super.onStart();
-    }
-
-    private void exitRoom(){
-        myRef.child("users").child(user.getUid()).removeValue();
     }
 
 }

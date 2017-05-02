@@ -47,8 +47,6 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-//        pager = (ViewPager)findViewById(R.id.pager);
-
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
 
@@ -66,10 +64,6 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         FragmentRoom r = FragmentRoom.getInstance(null);
         swapFragment(r);
         KokuvaApp.getInstance().addFragment(r);
-//        adapter = new ViewPagerAdapter(getSupportFragmentManager());
-//        adapter.addFragment(FragmentRoom.getInstance(null),"room");
-//        adapter.addFragment(FragmentUsers.getInstance(null),"users");
-//        pager.setAdapter(adapter);
         listenMyChats();
     }
 

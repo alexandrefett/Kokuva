@@ -8,7 +8,10 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
 
@@ -36,7 +39,6 @@ public class ChatsDialog extends DialogFragment {
         builder.setView(dialogView);
 
         final ListView list = (ListView)dialogView.findViewById(R.id.list_chats);
-        list.setAdapter(new ImageAdapter(getContext()));
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {

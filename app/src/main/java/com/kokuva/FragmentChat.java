@@ -43,12 +43,10 @@ public class FragmentChat extends BaseFragment {
 
         TextView t;
         if(m.getSender().equals(user.getUid())){
-//            t = new MessageView(getContext(), R.drawable.sender_msg_layout, Gravity.RIGHT);
             t = (TextView)getActivity().getLayoutInflater().inflate(R.layout.text_sender, scroll_messages, false);
         }
         else {
             t = (TextView)getActivity().getLayoutInflater().inflate(R.layout.text_receiver, scroll_messages, false);
-//            t = new MessageView(getContext(), R.drawable.receiver_msg_layout, Gravity.LEFT);
         }
         t.setText(m.getMessage());
         scroll_messages.addView(t);
@@ -135,14 +133,19 @@ public class FragmentChat extends BaseFragment {
                 }
             }
         });
-        listenMessages();
-        listenActive();
         return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
+    }
+    @Override
+
+    public void onResume() {
+        super.onResume();
+        listenMessages();
+        listenActive();
     }
 
     private void endChatDialog(final String n){
@@ -157,5 +160,4 @@ public class FragmentChat extends BaseFragment {
         builder.setTitle("Mensagem");
         builder.show();
     }
-
 }
