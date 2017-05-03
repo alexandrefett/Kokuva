@@ -74,7 +74,9 @@ public class FragmentRoom extends BaseFragment {
 
         list_users = (RecyclerView)view.findViewById(R.id.room_users_list);
 
-        getLocation();
+        //getLocation();
+        hideDialog();
+        getUsers();
 
         return view;
     }

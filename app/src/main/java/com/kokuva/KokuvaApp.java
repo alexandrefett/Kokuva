@@ -2,9 +2,13 @@ package com.kokuva;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.kokuva.model.Chat;
@@ -91,20 +95,6 @@ public class KokuvaApp extends Application {
         this.context = context;
     }
 
-    public static boolean isActivityVisible() {
-        return chatActivity;
-    }
-
-    public static void activityResumed() {
-        chatActivity = true;
-    }
-
-    public static void activityPaused() {
-        chatActivity = false;
-    }
-
-    private static boolean chatActivity;
-
     public void addChat(KokuvaUser userTo){
         DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
 
@@ -113,12 +103,48 @@ public class KokuvaApp extends Application {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("chats/"+user.getUid()+"/"+chatId, userTo);
         data.put("chats/"+userTo.getUid()+"/"+chatId, user);
-        //data.put("users/"+user.getUid()+"/chats/",chatId);
-        //data.put("users/"+"/chats/"+user.getUid(), chatId);
 
         myRef.updateChildren(data);
-
     }
 
+    public interface OnNewChat{
+        public void onNewChat();
+    }
+
+    private OnNewChat newChatListener;
+
+    private void listenMyChats(OnNewChat newChat){
+        newChatListener = newChat;
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference();
+        myRef.child("chats").child(user.getUid()).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Chat c  = dataSnapshot.getValue(Chat.class);
+                Bundle b = new Bundle();
+                b.putString("chatid", c.getChatId());
+                b.putString("userid", c.getUserTo().getUid());
+                b.putString("nick", c.getUserTo().getNick());
+                FragmentChat fragment = new FragmentChat();
+                fragment.setArguments(b);
+                KokuvaApp.getInstance().addFragment(fragment);
+                KokuvaApp.getInstance().addChat(c);
+                //swapFragment(fragment);
+//                adapter.addFragment(fragment,c.getChatId());
+//                pager.setCurrentItem(pager.getChildCount()-1, true);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {         }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {         }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {        }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {       }
+        });
+    }
 
 }
