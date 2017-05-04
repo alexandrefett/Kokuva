@@ -17,6 +17,7 @@ import android.widget.ListView;
 
 import com.kokuva.R;
 import com.kokuva.adapter.ImageAdapter;
+import com.kokuva.model.Chat;
 
 /**
  * Created by Alexandre on 23/04/2017.
@@ -25,7 +26,7 @@ import com.kokuva.adapter.ImageAdapter;
 public class ChatsDialog extends DialogFragment {
 
     public interface ChatDialogListener {
-        public void onItemClick(int position);
+        public void onItemClick(int i);
     }
 
     ChatDialogListener listener;

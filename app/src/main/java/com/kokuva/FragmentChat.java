@@ -33,12 +33,12 @@ public class FragmentChat extends BaseFragment {
 
     private DatabaseReference myRef;
     private KokuvaUser user;
-    private String chatid;
-    private String userid;
-    private String nick;
     private EditText text_msg;
     private ImageButton button_send;
     private LinearLayout scroll_messages;
+    private ChildEventListener listenMessages;
+    private ChildEventListener listenActive;
+    private Chat chat;
 
     private void viewMessage(Message m){
 
@@ -55,8 +55,12 @@ public class FragmentChat extends BaseFragment {
         text_msg.requestFocus();
     }
 
+    public void setChat(Chat c){
+        this.chat = c;
+    }
+
     private void listenMessages(){
-        myRef.child("msgs").child(chatid).addChildEventListener(new ChildEventListener() {
+        listenMessages = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Message msg = dataSnapshot.getValue(Message.class);
@@ -74,12 +78,12 @@ public class FragmentChat extends BaseFragment {
 
             @Override
             public void onCancelled(DatabaseError databaseError) { }
-        });
+        };
 
     }
 
     private void listenActive(){
-        myRef.child("chats").child(userid).child(user.getUid()).addChildEventListener(new ChildEventListener() {
+        listenActive = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {            }
 
@@ -88,14 +92,15 @@ public class FragmentChat extends BaseFragment {
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                endChatDialog(nick);            }
+                endChatDialog(chat.getUserTo().getNick());
+            }
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {           }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {         }
-        });
+        };
     }
 
     @Override
@@ -103,18 +108,18 @@ public class FragmentChat extends BaseFragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         if(args!=null) {
-            chatid = args.getString("chatid", "");
-            userid = args.getString("userid", "");
-            nick = args.getString("nick", "");
         }
 
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
+        listenMessages();
+        listenActive();
+
     }
 
     private void sendMsg(String msg){
         Message m = new Message(msg, user.getUid());
-        myRef.child("msgs").child(chatid).push().setValue(m);
+        myRef.child("msgs").child(chat.getChatId()).push().setValue(m);
     }
 
     @Override
@@ -154,15 +159,15 @@ public class FragmentChat extends BaseFragment {
     public void onStart() {
         super.onStart();
         Log.d(TAG,"----FragmentChat: OnStart");
+        myRef.child("msgs").child(chat.getChatId()).addChildEventListener(listenMessages);
+        myRef.child("chats").child(chat.getUserTo().getUid()).child(user.getUid()).addChildEventListener(listenActive);
     }
     @Override
     public void onResume(){
         super.onResume();
         Log.d(TAG,"----FragmentChat: OnResume");
-        listenMessages();
-        listenActive();
-
     }
+
     @Override
     public void onPause(){
         super.onPause();
@@ -173,7 +178,10 @@ public class FragmentChat extends BaseFragment {
     public void onStop(){
         super.onStop();
         Log.d(TAG,"----FragmentChat: OnStop");
-
     }
 
+    private void exitListen(){
+        myRef.removeEventListener(listenActive);
+        myRef.removeEventListener(listenMessages);
+    }
 }

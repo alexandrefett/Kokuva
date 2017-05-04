@@ -1,5 +1,6 @@
 package com.kokuva;
 
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -36,24 +37,26 @@ import java.util.Map;
 import static android.content.Context.LOCATION_SERVICE;
 
 public class FragmentRoom extends BaseFragment {
+
+    public interface OnClickUserListener{
+        public void onClickUser(KokuvaUser u);
+    }
+
     private DatabaseReference myRef;
     private KokuvaUser user;
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
     private RecyclerView list_users;
     private static FragmentRoom ourInstance;
+    Activity activity;
 
-    public static FragmentRoom getInstance(String value) {
+    public static FragmentRoom getInstance() {
         if (ourInstance == null) {
             ourInstance = new FragmentRoom();
-            if (value != null) {
-                Bundle args = new Bundle();
-                args.putString("value", value);
-                ourInstance.setArguments(args);
-            }
         }
         return ourInstance;
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,7 +65,7 @@ public class FragmentRoom extends BaseFragment {
         if(args!=null) {
             //userToId = args.getString("userToId", "");
         }
-
+        activity = getActivity();
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
     }
@@ -143,7 +146,13 @@ public class FragmentRoom extends BaseFragment {
             @Override
             public void onItemClick(KokuvaUser item) {
 
-                if(!KokuvaApp.getInstance().chatExist(item.getUid())) {
+                try{
+                    ((OnClickUserListener) activity).onClickUser(item);
+                }catch (ClassCastException cce){
+                    Log.d(TAG,"----FragmentRoom: "+cce.getMessage());
+                }
+
+/*                if(!KokuvaApp.getInstance().chatExist(item.getUid())) {
                     String chatId = myRef.child("chats").push().getKey();
                     Chat c1 = new Chat(chatId, user);
                     final Chat c2 = new Chat(chatId, item);
@@ -157,7 +166,7 @@ public class FragmentRoom extends BaseFragment {
                 else {
 
                 }
-
+*/
             }
         });
         RecyclerView.LayoutManager lm = new GridLayoutManager(getContext(),2);

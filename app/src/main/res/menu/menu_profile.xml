@@ -6,11 +6,16 @@
         android:icon="@drawable/ic_action_users"
         android:title="Pessoas próximas" />
     <item
-        android:id="@+id/nav_distance"
-        android:icon="@android:drawable/ic_dialog_map"
-        android:title="Distância" />
-    <item
         android:id="@+id/nav_chats"
         android:icon="@drawable/ic_question_answer"
         android:title="Distância" />
+    <item android:id="@+id/tools"
+        android:title="Tools"
+        android:icon="@drawable/ic_action_gear">
+        <!-- "file" submenu -->
+        <menu>
+            <item android:id="@+id/menu_distance"
+                android:title="Distância" />
+        </menu>
+    </item>
 </menu>
