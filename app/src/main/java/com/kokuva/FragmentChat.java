@@ -3,6 +3,7 @@ package com.kokuva;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -136,18 +137,6 @@ public class FragmentChat extends BaseFragment {
         return view;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-    @Override
-
-    public void onResume() {
-        super.onResume();
-        listenMessages();
-        listenActive();
-    }
-
     private void endChatDialog(final String n){
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setMessage(n+" saiu da conversa.")
@@ -160,4 +149,31 @@ public class FragmentChat extends BaseFragment {
         builder.setTitle("Mensagem");
         builder.show();
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG,"----FragmentChat: OnStart");
+    }
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.d(TAG,"----FragmentChat: OnResume");
+        listenMessages();
+        listenActive();
+
+    }
+    @Override
+    public void onPause(){
+        super.onPause();
+        Log.d(TAG,"----FragmentChat: OnPause");
+
+    }
+    @Override
+    public void onStop(){
+        super.onStop();
+        Log.d(TAG,"----FragmentChat: OnStop");
+
+    }
+
 }

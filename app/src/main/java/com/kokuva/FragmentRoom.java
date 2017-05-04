@@ -169,6 +169,25 @@ public class FragmentRoom extends BaseFragment {
     @Override
     public void onStart() {
         super.onStart();
+        Log.d(TAG,"----FragmentRoom: OnStart");
+    }
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.d(TAG,"----FragmentRoom: OnResume");
+
+    }
+    @Override
+    public void onPause(){
+        super.onPause();
+        Log.d(TAG,"----FragmentRoom: OnPause");
+
+    }
+    @Override
+    public void onStop(){
+        super.onStop();
+        Log.d(TAG,"----FragmentRoom: OnStop");
+
     }
 
 }

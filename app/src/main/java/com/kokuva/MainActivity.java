@@ -185,7 +185,27 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         showDialog();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         updateUI(currentUser);
+        Log.d(TAG,"----Main Activity: OnStart");
     }
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.d(TAG,"----Main Activity: OnResume");
+
+    }
+    @Override
+    public void onPause(){
+        super.onPause();
+        Log.d(TAG,"----Main Activity: OnPause");
+
+    }
+    @Override
+    public void onStop(){
+        super.onStop();
+        Log.d(TAG,"----Main Activity: OnStop");
+
+    }
+
 
     private void signInAnonymously() {
         showDialog();
