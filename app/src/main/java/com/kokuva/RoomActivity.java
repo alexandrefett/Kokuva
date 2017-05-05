@@ -75,6 +75,7 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     }
 
     public void creatChat(KokuvaUser item){
+        Log.d(TAG,"----RoomActivity: createChat");
         String chatId = myRef.child("chats").push().getKey();
         Chat c1 = new Chat(chatId, user);
         final Chat c2 = new Chat(chatId, item);
@@ -87,13 +88,20 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     }
 
     public void createFragmentChat(Chat c){
+        Log.d(TAG,"----RoomActivity: createFragmentChat");
+
+        Bundle b = new Bundle();
+        b.putString("chatId", c.getChatId());
         FragmentChat fragment = new FragmentChat();
-        fragment.setChat(c);
+        fragment.setArguments(b);
+
         KokuvaApp.getInstance().addChat(c);
         addAndShow(fragment, c.getUserTo().getUid());
     }
 
     public void addAndShow(Fragment f, String tag){
+        Log.d(TAG,"----RoomActivity: addAndShow");
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment current = fragmentManager.findFragmentById(R.id.fcontent);
         fragmentManager.beginTransaction()
@@ -105,6 +113,8 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     }
 
     public void swapFragment(Fragment f){
+        Log.d(TAG,"----RoomActivity: SwapFragment");
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment current = fragmentManager.findFragmentById(R.id.fcontent);
         fragmentManager.beginTransaction()
@@ -169,16 +179,7 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     public void onStop(){
         super.onStop();
         Log.d(TAG,"----RoomActivity: OnResume");
-        myRef.child("users").child(user.getUid()).child("lat").removeValue();
-        myRef.child("users").child(user.getUid()).child("log").removeValue();
-        myRef.child("chats").child(user.getUid()).removeValue();
-        myRef.removeEventListener(listenMyChats);
-        for(Fragment f:getSupportFragmentManager().getFragments()){
-            if(!f.getTag().equals("room")){
-                Fragment frag = getSupportFragmentManager().findFragmentByTag(f.getTag());
-                getSupportFragmentManager().beginTransaction().remove(frag).commit();
-            }
-        }
+
     }
 
     private void setDistance(){
@@ -201,6 +202,20 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         swapFragment(fragment);
     }
 
+    @Override
+    public void onBackPressed(){
+        super.onBackPressed();
+        myRef.child("users").child(user.getUid()).child("lat").removeValue();
+        myRef.child("users").child(user.getUid()).child("log").removeValue();
+        myRef.child("chats").child(user.getUid()).removeValue();
+        myRef.removeEventListener(listenMyChats);
+        for(Fragment f:getSupportFragmentManager().getFragments()){
+            if(!f.getTag().equals("room")){
+                Fragment frag = getSupportFragmentManager().findFragmentByTag(f.getTag());
+                getSupportFragmentManager().beginTransaction().remove(frag).commit();
+            }
+        }
+    }
     @Override
     public void onStart() {
         super.onStart();

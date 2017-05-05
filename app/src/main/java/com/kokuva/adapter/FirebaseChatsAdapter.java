@@ -32,7 +32,7 @@ public class FirebaseChatsAdapter extends FirebaseRecyclerAdapter<FirebaseChatsA
         public UserViewHolder (View itemView){
             super(itemView);
             nick = (TextView) itemView.findViewById(R.id.chat_item_nick);
-            image = (ImageView) itemView.findViewById(R.id.chat_item_image);
+            image = (ImageView) itemView.findViewById(R.id.message_item_image);
             v = itemView;
         }
     }

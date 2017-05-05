@@ -4,30 +4,25 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseUser;
+import com.bumptech.glide.Glide;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.kokuva.model.Chat;
 import com.kokuva.model.KokuvaUser;
 import com.kokuva.model.Message;
-import com.kokuva.views.MessageView;
-import com.kokuva.views.ReceiverMsgView;
-import com.kokuva.views.SenderMsgView;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class FragmentChat extends BaseFragment {
 
@@ -39,7 +34,7 @@ public class FragmentChat extends BaseFragment {
     private ChildEventListener listenMessages;
     private ChildEventListener listenActive;
     private Chat chat;
-
+    private String chatId;
     private void viewMessage(Message m){
 
         TextView t;
@@ -108,13 +103,13 @@ public class FragmentChat extends BaseFragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         if(args!=null) {
+            chat = KokuvaApp.getInstance().getChat(args.getString("chatId"));
         }
 
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
         listenMessages();
         listenActive();
-
     }
 
     private void sendMsg(String msg){
@@ -139,6 +134,15 @@ public class FragmentChat extends BaseFragment {
                 }
             }
         });
+        TextView nick = (TextView)view.findViewById(R.id.message_item_nick);
+        nick.setText(chat.getUserTo().getNick());
+        CircleImageView image = (CircleImageView)view.findViewById(R.id.message_item_image);
+        if(chat.getUserTo().isPhoto())
+            Glide.with(getContext())
+                    .load(chat.getUserTo().getUrl())
+                    .into(image);
+        else
+            image.setImageResource(getResources().getIdentifier(user.getUrl(), "drawable", getContext().getPackageName()));
         return view;
     }
 

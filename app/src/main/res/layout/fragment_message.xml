@@ -13,6 +13,35 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/message_item_image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:src="@drawable/ic_action_user"
+            app:civ_border_color="#FF000000"
+            app:civ_border_width="1dp" />
+
+        <TextView
+            android:id="@+id/message_item_nick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/message_item_image"
+            android:layout_alignTop="@+id/message_item_image"
+            android:layout_marginStart="12dp"
+            android:layout_toEndOf="@+id/message_item_image"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:padding="3dp"
+            android:text="DisplayName"
+            android:textColor="@color/common_google_signin_btn_text_light_focused"
+            android:textSize="18sp" />
+
         <ImageButton
             android:id="@+id/button_send"
             android:layout_width="wrap_content"
@@ -29,7 +58,7 @@
             android:layout_alignParentStart="true"
             android:layout_margin="5dp"
             android:layout_toStartOf="@+id/button_send"
-            android:background="@drawable/sender_msg_layout"
+            android:background="@drawable/text_msg_layout"
             android:ems="10"
             android:imeOptions="actionSend"
             android:inputType="textCapSentences"
@@ -42,8 +71,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_above="@+id/button_send">
+            android:layout_above="@+id/button_send"
+            android:layout_below="@+id/message_item_image">
 
             <LinearLayout
                 android:id="@+id/scroll_messages"

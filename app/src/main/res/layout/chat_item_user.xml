@@ -9,7 +9,7 @@
     android:paddingTop="5dp">
 
     <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/chat_item_image"
+        android:id="@+id/message_item_image"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_alignParentStart="true"
@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="false"
         android:layout_centerVertical="false"
-        android:layout_toEndOf="@+id/chat_item_image"
+        android:layout_toEndOf="@+id/message_item_image"
         android:layout_weight="1"
         android:gravity="center_vertical"
         android:padding="3dp"

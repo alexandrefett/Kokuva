@@ -32,6 +32,15 @@ public class KokuvaApp extends Application {
         return chats.get(i);
     }
 
+    public Chat getChat(String chatid){
+        for(Chat c:chats){
+            if(c.getChatId().equals(chatid)){
+                return c;
+            }
+        }
+        return null;
+    }
+
     public boolean chatExist(String userid){
         for(Chat c:chats){
             if(c.getUserTo().getUid().equals(userid)){
