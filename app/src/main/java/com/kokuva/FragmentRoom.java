@@ -145,28 +145,11 @@ public class FragmentRoom extends BaseFragment {
         userAdapter.addOnClickItemListener(new FirebaseUsersAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(KokuvaUser item) {
-
                 try{
                     ((OnClickUserListener) activity).onClickUser(item);
                 }catch (ClassCastException cce){
                     Log.d(TAG,"----FragmentRoom: "+cce.getMessage());
                 }
-
-/*                if(!KokuvaApp.getInstance().chatExist(item.getUid())) {
-                    String chatId = myRef.child("chats").push().getKey();
-                    Chat c1 = new Chat(chatId, user);
-                    final Chat c2 = new Chat(chatId, item);
-
-                    Map<String, Object> data = new HashMap<String, Object>();
-                    data.put("chats/" + user.getUid() + "/" + item.getUid(), c2);
-                    data.put("chats/" + item.getUid() + "/" + user.getUid(), c1);
-
-                    myRef.updateChildren(data);
-                }
-                else {
-
-                }
-*/
             }
         });
         RecyclerView.LayoutManager lm = new GridLayoutManager(getContext(),2);

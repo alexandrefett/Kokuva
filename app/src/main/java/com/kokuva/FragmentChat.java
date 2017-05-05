@@ -34,7 +34,7 @@ public class FragmentChat extends BaseFragment {
     private ChildEventListener listenMessages;
     private ChildEventListener listenActive;
     private Chat chat;
-    private String chatId;
+
     private void viewMessage(Message m){
 
         TextView t;
@@ -48,10 +48,6 @@ public class FragmentChat extends BaseFragment {
         scroll_messages.addView(t);
         t.requestFocus();
         text_msg.requestFocus();
-    }
-
-    public void setChat(Chat c){
-        this.chat = c;
     }
 
     private void listenMessages(){

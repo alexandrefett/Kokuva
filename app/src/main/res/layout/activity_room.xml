@@ -10,9 +10,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <fragment android:name="com.kokuva.FragmentRoom"
-            android:id="@+id/fcontent"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:tag="room"/>
+            android:id="@+id/fcontent"/>
 </LinearLayout>
