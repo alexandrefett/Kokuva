@@ -41,13 +41,13 @@ public class KokuvaApp extends Application {
         return null;
     }
 
-    public boolean chatExist(String userid){
+    public Chat getUserChat(String userid){
         for(Chat c:chats){
             if(c.getUserTo().getUid().equals(userid)){
-                return true;
+                return c;
             }
         }
-        return false;
+        return null;
     }
 
     public void addChat(Chat chat){

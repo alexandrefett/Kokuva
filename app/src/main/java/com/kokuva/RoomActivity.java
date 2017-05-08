@@ -1,12 +1,12 @@
 package com.kokuva;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -19,6 +19,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.kokuva.adapter.ChatAdapter;
+import com.kokuva.adapter.MyAdapter;
 import com.kokuva.dialogs.ChatsDialog;
 import com.kokuva.dialogs.DistanceDialog;
 import com.kokuva.model.Chat;
@@ -35,7 +36,8 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     private KokuvaUser user;
     private Toolbar toolbar;
     private ChildEventListener listenMyChats;
-    private ChatAdapter adapter;
+    private MyAdapter adapter;
+    private ViewPager pager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +50,8 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
 
         myRef = FirebaseDatabase.getInstance().getReference();
         user = KokuvaApp.getInstance().getUser();
-        adapter = new ChatAdapter(this, new ArrayList<Chat>());
+        adapter = new MyAdapter(getSupportFragmentManager());
+        pager = (ViewPager)findViewById(R.id.pager);
     }
 
     private void setupListen(){
@@ -96,41 +99,45 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         fragment.setArguments(b);
 
         KokuvaApp.getInstance().addChat(c);
-        addAndShow(fragment, c.getUserTo().getUid());
+        addAndShow(fragment, c.getChatId());
     }
 
     public void addAndShow(Fragment f, String tag){
-        Log.d(TAG,"----RoomActivity: addAndShow");
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
+        adapter.addFragment(f);
+        pager.setCurrentItem(adapter.getCount()-1);
+/*        FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
 
-        Fragment current = fragmentManager.findFragmentById(R.id.fcontent);
-        ft      .add(R.id.fcontent, f, tag)
+        Fragment current = fragmentManager.findFragmentById(R.id.frg_content);
+        ft      .add(R.id.frg_content, f, tag)
                 .hide(current)
-                .show(f)
                 .commit();
-        //swapFragment(f);
+                */
     }
 
-    public void swapFragment(Fragment f){
+//    public void swapFragment(Fragment show){
+    public void swapFragment(Chat c){
         Log.d(TAG,"----RoomActivity: SwapFragment");
+/*
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment current = fragmentManager.findFragmentById(R.id.fcontent);
-        Log.d(TAG,"----RoomActivity: CurrentFragment: "+current.getTag());
+        Fragment hide = fragmentManager.findFragmentById(R.id.frg_content);
         FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft      .hide(current)
-                .show(f)
-                .commit();
-    }
 
+        ft      .hide(hide)
+                .show(show)
+                .commit();
+*/
+    }
     private void setupFragment(){
-        FragmentRoom r = FragmentRoom.getInstance();
+        pager.setAdapter(adapter);
+        adapter.addFragment(FragmentRoom.getInstance());
+  /*    FragmentRoom r = FragmentRoom.getInstance();
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .add(R.id.fcontent, r, "room")
+                .add(R.id.frg_content, r, "room")
                 .commit();
         setupListen();
+        */
     }
 
     @Override
@@ -144,7 +151,7 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.nav_room:
-                swapFragment(getSupportFragmentManager().findFragmentByTag("room"));
+//                swapFragment(getSupportFragmentManager().findFragmentByTag("room"));
                 break;
             case R.id.nav_distance:
                 setDistance();
@@ -163,7 +170,6 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
         newFragment.show(getSupportFragmentManager(), "chats");
     }
 
-
     private void endChatDialog(final Chat c){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(c.getUserTo().getNick()+" saiu da conversa.")
@@ -174,13 +180,6 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
                 });
         builder.setTitle("Mensagem");
         builder.show();
-    }
-
-    @Override
-    public void onStop(){
-        super.onStop();
-        Log.d(TAG,"----RoomActivity: OnResume");
-
     }
 
     private void setDistance(){
@@ -198,20 +197,22 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
 
     @Override
     public void onItemClick(int position) {
-        KokuvaUser k = KokuvaApp.getInstance().getChat(position).getUserTo();
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag(k.getUid());
-        swapFragment(fragment);
+        Chat c = KokuvaApp.getInstance().getChat(position);
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(c.getChatId());
+ //       swapFragment(fragment);
     }
 
     @Override
     public void onBackPressed(){
+        //Fragment frg = getSupportFragmentManager().findFragmentById(R.id.frg_content);
+        //Log.d(TAG,"----RoomActivity: backpressed "+frg.getTag());
         if(getSupportFragmentManager().findFragmentByTag("room").isVisible()){
             myRef.child("users").child(user.getUid()).child("lat").removeValue();
             myRef.child("users").child(user.getUid()).child("log").removeValue();
             myRef.child("chats").child(user.getUid()).removeValue();
             myRef.removeEventListener(listenMyChats);
             for (Fragment f : getSupportFragmentManager().getFragments()) {
-                Log.d(TAG,"----RoomActivity: "+f.getTag());
+                Log.d(TAG,"----RoomActivity: removing "+f.getTag());
                 if (!f.getTag().equals("room")) {
                     Fragment frag = getSupportFragmentManager().findFragmentByTag(f.getTag());
                     getSupportFragmentManager().beginTransaction().remove(frag).commit();
@@ -220,44 +221,28 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
             super.onBackPressed();
         }
         else{
-            Fragment room = getSupportFragmentManager().findFragmentByTag("room");
-            swapFragment(room);
+            //Fragment room = getSupportFragmentManager().findFragmentByTag("room");
+            //swapFragment(room);
+            pager.setCurrentItem(0);
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        Log.d(TAG,"----RoomActivity: OnStart");
-    }
-
-    @Override
+     @Override
     public void onPostResume(){
         super.onPostResume();
         setupFragment();
-        setupListen();
-    }
-
-    @Override
-    public void onResume(){
-        super.onResume();
-        Log.d(TAG,"----RoomActivity: OnResume");
-    }
-
-    @Override
-    public void onPause(){
-        super.onPause();
-        Log.d(TAG,"----RoomActivity: OnPause");
+        //setupListen();
     }
 
     @Override
     public void onClickUser(KokuvaUser u) {
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag(u.getUid());
-        if(fragment==null){
+        Chat c = KokuvaApp.getInstance().getUserChat(u.getUid());
+        if(c==null){
             creatChat(u);
         }
         else{
-            swapFragment(fragment);
+            Fragment fragment = getSupportFragmentManager().findFragmentByTag(c.getChatId());
+            swapFragment(c);
         }
     }
 }
