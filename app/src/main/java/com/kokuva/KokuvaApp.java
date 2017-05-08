@@ -32,6 +32,12 @@ public class KokuvaApp extends Application {
         return chats.get(i);
     }
 
+    public int getChat(Chat c){
+        if(chats.contains(c))
+            return chats.indexOf(c)+1;
+        else
+            return 0;
+    }
     public Chat getChat(String chatid){
         for(Chat c:chats){
             if(c.getChatId().equals(chatid)){

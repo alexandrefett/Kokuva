@@ -104,7 +104,7 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
 
     public void addAndShow(Fragment f, String tag){
         adapter.addFragment(f);
-        pager.setCurrentItem(adapter.getCount()-1);
+        pager.setCurrentItem(adapter.getCount()-1, false);
 /*        FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
 
@@ -117,7 +117,9 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
 
 //    public void swapFragment(Fragment show){
     public void swapFragment(Chat c){
-        Log.d(TAG,"----RoomActivity: SwapFragment");
+        Log.d(TAG,"----RoomActivity: SwapFragment: "+pager.getCurrentItem());
+        int i = KokuvaApp.getInstance().getChat(c);
+        pager.setCurrentItem(i, false);
 /*
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment hide = fragmentManager.findFragmentById(R.id.frg_content);
@@ -131,6 +133,7 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     private void setupFragment(){
         pager.setAdapter(adapter);
         adapter.addFragment(FragmentRoom.getInstance());
+        setupListen();
   /*    FragmentRoom r = FragmentRoom.getInstance();
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
@@ -204,9 +207,21 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
 
     @Override
     public void onBackPressed(){
+        Log.d(TAG,"----RoomActivity: backpressed: "+pager.getCurrentItem());
+        if(pager.getCurrentItem()==0){
+            myRef.child("users").child(user.getUid()).child("lat").removeValue();
+            myRef.child("users").child(user.getUid()).child("log").removeValue();
+            myRef.child("chats").child(user.getUid()).removeValue();
+            myRef.removeEventListener(listenMyChats);
+            super.onBackPressed();
+            this.finish();
+        }
+        else{
+            pager.setCurrentItem(0, false);
+        }
         //Fragment frg = getSupportFragmentManager().findFragmentById(R.id.frg_content);
         //Log.d(TAG,"----RoomActivity: backpressed "+frg.getTag());
-        if(getSupportFragmentManager().findFragmentByTag("room").isVisible()){
+/*        if(getSupportFragmentManager().findFragmentByTag("room").isVisible()){
             myRef.child("users").child(user.getUid()).child("lat").removeValue();
             myRef.child("users").child(user.getUid()).child("log").removeValue();
             myRef.child("chats").child(user.getUid()).removeValue();
@@ -225,6 +240,7 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
             //swapFragment(room);
             pager.setCurrentItem(0);
         }
+        */
     }
 
      @Override
@@ -241,7 +257,7 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
             creatChat(u);
         }
         else{
-            Fragment fragment = getSupportFragmentManager().findFragmentByTag(c.getChatId());
+            //Fragment fragment = getSupportFragmentManager().findFragmentByTag(c.getChatId());
             swapFragment(c);
         }
     }
