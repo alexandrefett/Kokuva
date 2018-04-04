@@ -29,8 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RoomActivity extends BaseActivity implements DistanceDialog.DistanceDialogListener,
-        ChatsDialog.ChatDialogListener, FragmentRoom.OnClickUserListener {
+public class RoomActivity extends BaseActivity implements ChatsDialog.ChatDialogListener, FragmentRoom.OnClickUserListener {
 
     private DatabaseReference myRef;
     private KokuvaUser user;
@@ -59,7 +58,7 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Chat c  = dataSnapshot.getValue(Chat.class);
-                createFragmentChat(c);
+                alertNewChat(c);
             }
 
             @Override
@@ -105,42 +104,18 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     public void addAndShow(Fragment f, String tag){
         adapter.addFragment(f);
         pager.setCurrentItem(adapter.getCount()-1, false);
-/*        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction ft = fragmentManager.beginTransaction();
-
-        Fragment current = fragmentManager.findFragmentById(R.id.frg_content);
-        ft      .add(R.id.frg_content, f, tag)
-                .hide(current)
-                .commit();
-                */
     }
 
-//    public void swapFragment(Fragment show){
     public void swapFragment(Chat c){
         Log.d(TAG,"----RoomActivity: SwapFragment: "+pager.getCurrentItem());
         int i = KokuvaApp.getInstance().getChat(c);
         pager.setCurrentItem(i, false);
-/*
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment hide = fragmentManager.findFragmentById(R.id.frg_content);
-        FragmentTransaction ft = fragmentManager.beginTransaction();
 
-        ft      .hide(hide)
-                .show(show)
-                .commit();
-*/
     }
     private void setupFragment(){
         pager.setAdapter(adapter);
         adapter.addFragment(FragmentRoom.getInstance());
         setupListen();
-  /*    FragmentRoom r = FragmentRoom.getInstance();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .add(R.id.frg_content, r, "room")
-                .commit();
-        setupListen();
-        */
     }
 
     @Override
@@ -186,17 +161,10 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     }
 
     private void setDistance(){
-        Bundle b = new Bundle();
-        b.putInt("distance", user.getDist());
         DialogFragment newFragment = new DistanceDialog();
-        newFragment.setArguments(b);
         newFragment.show(getSupportFragmentManager(), "avatar");
     }
 
-    @Override
-    public void onDistanceChange(int distance) {
-        user.setDist(distance);
-    }
 
     @Override
     public void onItemClick(int position) {
@@ -247,7 +215,6 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
     public void onPostResume(){
         super.onPostResume();
         setupFragment();
-        //setupListen();
     }
 
     @Override
@@ -260,6 +227,22 @@ public class RoomActivity extends BaseActivity implements DistanceDialog.Distanc
             //Fragment fragment = getSupportFragmentManager().findFragmentByTag(c.getChatId());
             swapFragment(c);
         }
+    }
+
+    private void alertNewChat(final Chat c) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(c.getUserTo().getNick() + " deseja conversar com você. Você aceita?")
+                .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        createFragmentChat(c);
+                    }
+                })
+                .setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                });
+        builder.create();
     }
 }
 

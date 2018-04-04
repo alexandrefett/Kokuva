@@ -21,15 +21,13 @@ public class AcceptDialog extends DialogFragment {
         builder.setMessage(nick+" deseja conversar com você. Você aceita?")
                 .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // FIRE ZE MISSILES!
                     }
                 })
                 .setNegativeButton("não", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
+
                     }
                 });
-        // Create the AlertDialog object and return it
         return builder.create();
     }
 }

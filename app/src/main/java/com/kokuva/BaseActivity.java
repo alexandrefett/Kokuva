@@ -1,5 +1,6 @@
 package com.kokuva;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.support.v7.app.AppCompatActivity;
 

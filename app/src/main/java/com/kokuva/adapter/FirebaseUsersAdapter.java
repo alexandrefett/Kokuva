@@ -68,19 +68,12 @@ public class FirebaseUsersAdapter extends FirebaseRecyclerAdapter<FirebaseUsersA
 
         viewHolder.v.setOnClickListener(null);
         viewHolder.nick.setText(user.getNick());
-        viewHolder.nick.setTextColor(user.getColor());
         viewHolder.v.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 listener.onItemClick(user);
             }
         });
-        if(user.isPhoto())
-            Glide.with(context)
-                    .load(user.getUrl())
-                    .into(viewHolder.image);
-        else
-            viewHolder.image.setImageResource(context.getResources().getIdentifier(user.getUrl(), "drawable", context.getPackageName()));
 
     }
 

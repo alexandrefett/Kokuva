@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
-import com.google.firebase.database.Query;
+import com.google.firebase.firestore.Query;
 import com.kokuva.R;
 import com.kokuva.model.Chat;
 import java.util.ArrayList;
@@ -66,20 +66,12 @@ public class FirebaseChatsAdapter extends FirebaseRecyclerAdapter<FirebaseChatsA
 
         viewHolder.v.setOnClickListener(null);
         viewHolder.nick.setText(chat.getUserTo().getNick());
-        viewHolder.nick.setTextColor(chat.getUserTo().getColor());
         viewHolder.v.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 listener.onItemClick(chat);
             }
         });
-        if(chat.getUserTo().isPhoto())
-            Glide.with(context)
-                    .load(chat.getUserTo().getUrl())
-                    .into(viewHolder.image);
-        else
-            viewHolder.image.setImageResource(context.getResources()
-                    .getIdentifier(chat.getUserTo().getUrl(), "drawable", context.getPackageName()));
 
     }
 

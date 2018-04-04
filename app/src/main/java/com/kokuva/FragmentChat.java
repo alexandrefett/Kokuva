@@ -22,8 +22,6 @@ import com.kokuva.model.Chat;
 import com.kokuva.model.KokuvaUser;
 import com.kokuva.model.Message;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
 public class FragmentChat extends BaseFragment {
 
     private DatabaseReference myRef;
@@ -132,13 +130,6 @@ public class FragmentChat extends BaseFragment {
         });
         TextView nick = (TextView)view.findViewById(R.id.message_item_nick);
         nick.setText(chat.getUserTo().getNick());
-        CircleImageView image = (CircleImageView)view.findViewById(R.id.message_item_image);
-        if(chat.getUserTo().isPhoto())
-            Glide.with(getContext())
-                    .load(chat.getUserTo().getUrl())
-                    .into(image);
-        else
-            image.setImageResource(getResources().getIdentifier(user.getUrl(), "drawable", getContext().getPackageName()));
         return view;
     }
 

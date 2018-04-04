@@ -83,57 +83,7 @@ public class FragmentRoom extends BaseFragment {
 
         return view;
     }
-    private void getLocation() {
-        showDialog();
-        mLocationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
-        mLocationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(final Location location) {
-                updateLocation(location);
-            }
 
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {      }
-
-            @Override
-            public void onProviderEnabled(String s) {     }
-
-            @Override
-            public void onProviderDisabled(String s) {         }
-        };
-
-        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            return;
-        }
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1, 1, mLocationListener);
-    }
-
-    private void updateLocation(final Location l) {
-        mLocationManager.removeUpdates(mLocationListener);
-        user.setLat(l.getLatitude());
-        user.setLog(l.getLongitude());
-
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put("users/"+user.getUid()+"/lat", user.getLat());
-        data.put("users/"+user.getUid()+"/log", user.getLog());
-
-        myRef.updateChildren(data).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                hideDialog();
-                getUsers();
-            }
-        })
-        .addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "onFailure: " + e.getMessage());
-                hideDialog();
-            }
-        });
-    }
 
     private void getUsers(){
         ArrayList<KokuvaUser> users = new ArrayList<KokuvaUser>();
