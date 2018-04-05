@@ -1,39 +1,41 @@
 package com.kokuva.model;
 
-import java.util.ArrayList;
+import com.google.firebase.firestore.ServerTimestamp;
+
+import java.util.Date;
 
 /**
  * Created by Alexandre on 21/09/2016.
  */
 
 public class Chat {
+    private String mName;
+    private String mMessage;
+    private String mUid;
+    private Date mTimestamp;
 
-    private String chatId;
-    private KokuvaUser userTo;
+    public Chat() { } // Needed for Firebase
 
-    public KokuvaUser getUserTo() {
-        return userTo;
+    public Chat(String name, String message, String uid) {
+        mName = name;
+        mMessage = message;
+        mUid = uid;
     }
 
-    public void setUserTo(KokuvaUser userTo) {
-        this.userTo = userTo;
-    }
+    public String getName() { return mName; }
 
-    public String getChatId() {
-        return chatId;
-    }
+    public void setName(String name) { mName = name; }
 
-    public void setChatId(String chatId) {
-        this.chatId = chatId;
-    }
+    public String getMessage() { return mMessage; }
 
-    public Chat(){
-    }
+    public void setMessage(String message) { mMessage = message; }
 
-    public Chat(String chatId, KokuvaUser user){
-        this.userTo = user;
-        this.chatId = chatId;
-    }
+    public String getUid() { return mUid; }
 
+    public void setUid(String uid) { mUid = uid; }
 
+    @ServerTimestamp
+    public Date getTimestamp() { return mTimestamp; }
+
+    public void setTimestamp(Date timestamp) { mTimestamp = timestamp; }
 }
