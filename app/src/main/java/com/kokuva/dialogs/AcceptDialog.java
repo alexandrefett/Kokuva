@@ -18,12 +18,12 @@ public class AcceptDialog extends DialogFragment {
         // Use the Builder class for convenient dialog construction
         String nick = savedInstanceState.getString("nick");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(nick+" deseja conversar com você. Você aceita?")
-                .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+        builder.setMessage(nick+" deseja conversar com você.")
+                .setPositiveButton("Aceitar", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                     }
                 })
-                .setNegativeButton("não", new DialogInterface.OnClickListener() {
+                .setNegativeButton("Recusar", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
                     }
