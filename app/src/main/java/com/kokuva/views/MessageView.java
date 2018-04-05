@@ -5,12 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-
-import com.kokuva.R;
-import com.kokuva.model.Message;
 
 /**
  * Created by Alexandre on 01/05/2017.

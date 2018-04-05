@@ -37,7 +37,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     private static int REQUEST_PERMISSIONS = 3;
     private static final CollectionReference sRoomsCollection =
             FirebaseFirestore.getInstance().collection("rooms");
-    private static final Query sRoomQuery = sRoomsCollection.whereEqualTo("reserved", true);
+    private static final Query sRoomQuery = sRoomsCollection.whereEqualTo("reserved", false);
 
     static {
         FirebaseFirestore.setLoggingEnabled(true);

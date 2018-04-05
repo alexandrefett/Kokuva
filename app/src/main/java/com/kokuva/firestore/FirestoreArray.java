@@ -2,7 +2,6 @@ package com.kokuva.firestore;
 
 import android.support.annotation.NonNull;
 
-import com.firebase.ui.common.ChangeEventType;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -12,6 +11,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QueryListenOptions;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.kokuva.common.ChangeEventType;
 
 import java.util.ArrayList;
 import java.util.List;

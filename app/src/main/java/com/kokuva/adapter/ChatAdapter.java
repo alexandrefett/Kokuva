@@ -49,7 +49,7 @@ public class ChatAdapter extends BaseAdapter {
             text = (TextView) convertView;
         }
         //imageView.setImageResource(mContext.getResources().getIdentifier(mThumbIds[position], "drawable", mContext.getPackageName()));
-        text.setText(array.get(position).getUserTo().getNick());
+        text.setText(array.get(position).getName());
         return text;
     }
 

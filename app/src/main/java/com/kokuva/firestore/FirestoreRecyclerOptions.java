@@ -3,12 +3,9 @@ package com.kokuva.firestore;
 import android.arch.lifecycle.LifecycleOwner;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryListenOptions;
 
-import static com.firebase.ui.common.Preconditions.assertNonNull;
-import static com.firebase.ui.common.Preconditions.assertNull;
 
 /**
  * Options to configure an {@link FirestoreRecyclerAdapter}.
@@ -64,7 +61,7 @@ public class FirestoreRecyclerOptions<T> {
          */
         @NonNull
         public Builder<T> setSnapshotArray(@NonNull ObservableSnapshotArray<T> snapshots) {
-            assertNull(mSnapshots, ERR_SNAPSHOTS_SET);
+            //assertNull(mSnapshots, ERR_SNAPSHOTS_SET);
 
             mSnapshots = snapshots;
             return this;
@@ -79,7 +76,7 @@ public class FirestoreRecyclerOptions<T> {
         public Builder<T> setQuery(@NonNull Query query,
                                    @NonNull QueryListenOptions options,
                                    @NonNull SnapshotParser<T> parser) {
-            assertNull(mSnapshots, ERR_SNAPSHOTS_SET);
+            //assertNull(mSnapshots, ERR_SNAPSHOTS_SET);
 
             mSnapshots = new FirestoreArray<>(query, options, parser);
             return this;
@@ -132,7 +129,7 @@ public class FirestoreRecyclerOptions<T> {
          */
         @NonNull
         public FirestoreRecyclerOptions<T> build() {
-            assertNonNull(mSnapshots, ERR_SNAPSHOTS_NULL);
+            //assertNonNull(mSnapshots, ERR_SNAPSHOTS_NULL);
 
             return new FirestoreRecyclerOptions<>(mSnapshots, mOwner);
         }

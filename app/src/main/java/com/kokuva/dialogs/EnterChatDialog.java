@@ -1,23 +1,14 @@
 package com.kokuva.dialogs;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Adapter;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
-import android.widget.ListView;
 
 import com.kokuva.R;
-import com.kokuva.adapter.ImageAdapter;
-import com.kokuva.model.Chat;
 
 /**
  * Created by Alexandre on 23/04/2018
