@@ -7,105 +7,69 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.Toast;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.storage.FirebaseStorage;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.firebase.firestore.Query;
+import com.kokuva.dialogs.EnterChatDialog;
+import com.kokuva.firestore.FirestoreRecyclerAdapter;
+import com.kokuva.firestore.FirestoreRecyclerOptions;
+import com.kokuva.model.Chat;
+import com.kokuva.model.Room;
+import com.kokuva.model.RoomHolder;
 
 
-public class MainActivity extends BaseActivity implements View.OnClickListener{
+public class MainActivity extends BaseActivity implements View.OnClickListener, EnterChatDialog.NoticeDialogListener, FirebaseAuth.AuthStateListener {
 
     private FirebaseAuth mAuth;
-    private FirebaseStorage storage;
     private static int REQUEST_IMAGE_CAPTURE = 1;
     private static int REQUEST_IMAGE_GALLERY = 2;
     private static int REQUEST_PERMISSIONS = 3;
-    private  FirebaseFirestore db;
-    private LinearLayout rooms;
+    private static final CollectionReference sRoomsCollection =
+            FirebaseFirestore.getInstance().collection("rooms");
+    private static final Query sRoomQuery = sRoomsCollection.whereEqualTo("reserved", true);
+
+    static {
+        FirebaseFirestore.setLoggingEnabled(true);
+    }
+
+    private RecyclerView mRecyclerView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        KokuvaApp.getInstance().setContext(this);
-        mAuth = FirebaseAuth.getInstance();
-        storage = FirebaseStorage.getInstance();
-        db = FirebaseFirestore.getInstance();
 
         setContentView(R.layout.activity_main);
-        rooms = (LinearLayout)findViewById(R.id.rooms_scroll);
+        mRecyclerView = (RecyclerView)findViewById(R.id.rooms);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        createRoomsButtons();
     }
 
 
     private void addUserMac(String mac, String uuid){
-        Map<String, Object> user = new HashMap<>();
-        user.put("uuid", uuid);
-        user.put("mac", mac);
-        user.put("date", Calendar.getInstance().getTimeInMillis());
-
-        db.collection("users")
-                .add(user)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document", e);
-                    }
-                });
-    }
-
-    private void createRoomsButtons(){
-        db.collection("rooms")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-
-                            }
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
-                        }
-                    }
-                });
-
-//        Button enter = (Button)findViewById(R.id.button_enter);
-//        enter.setOnClickListener(this);
     }
 
 
-    private Button addRoomButton(DocumentSnapshot doc){
+
+    private Button addRoomButton(final DocumentSnapshot doc){
         Button button = new Button(this);
         button.setText((String)doc.get("name"));
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                EnterChatDialog dialog = new EnterChatDialog();
+                dialog.setIdRoom(doc.getId());
+                dialog.show(getSupportFragmentManager(), "EnterChatDialog");
             }
         });
         return button;
@@ -140,9 +104,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     @Override
     public void onStart() {
         super.onStart();
-        showDialog();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
+        if (isSignedIn()) { attachRecyclerViewAdapter(); }
+        FirebaseAuth.getInstance().addAuthStateListener(this);
         Log.d(TAG,"----Main Activity: OnStart");
     }
     @Override
@@ -160,44 +123,79 @@ public class MainActivity extends BaseActivity implements View.OnClickListener{
     @Override
     public void onStop(){
         super.onStop();
+        FirebaseAuth.getInstance().removeAuthStateListener(this);
         Log.d(TAG,"----Main Activity: OnStop");
 
     }
 
-
-    private void signInAnonymously() {
-        showDialog();
-        mAuth.signInAnonymously()
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "signInAnonymously:success");
-                            FirebaseUser fuser = mAuth.getCurrentUser();
-                            addUserMac(fuser.getUid(), getMac());
-                            updateUI(fuser);
-                        } else {
-                            Log.w(TAG, "signInAnonymously:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                            updateUI(null);
-                        }
-                    }
-                });
-    }
-
-    private void updateUI(final FirebaseUser u){
-        boolean isSignedIn = (u != null);
-        if (isSignedIn) {
-            createRoomsButtons();
-        } else {
-            signInAnonymously();
-        }
-    }
-
-
     @Override
     public void onClick(View view) {
         int id = view.getId();
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+
+    }
+
+    @Override
+    public void onAuthStateChanged(@NonNull FirebaseAuth auth) {
+
+        if (isSignedIn()) {
+            attachRecyclerViewAdapter();
+        } else {
+            Toast.makeText(this, R.string.signing_in, Toast.LENGTH_SHORT).show();
+            auth.signInAnonymously().addOnCompleteListener(new SignInResultNotifier(this));
+        }
+    }
+
+    private boolean isSignedIn() {
+        return FirebaseAuth.getInstance().getCurrentUser() != null;
+    }
+
+    private void attachRecyclerViewAdapter() {
+        final RecyclerView.Adapter adapter = newAdapter();
+
+        // Scroll to bottom on new messages
+        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
+            }
+        });
+
+        mRecyclerView.setAdapter(adapter);
+    }
+
+    protected RecyclerView.Adapter newAdapter() {
+        FirestoreRecyclerOptions<Room> options =
+                new FirestoreRecyclerOptions.Builder<Room>()
+                        .setQuery(sRoomQuery, Room.class)
+                        .setLifecycleOwner(this)
+                        .build();
+
+        return new FirestoreRecyclerAdapter<Room, RoomHolder>(options) {
+            @Override
+            public RoomHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                return new RoomHolder(LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_room, parent, false));
+            }
+
+            @Override
+            protected void onBindViewHolder(@NonNull RoomHolder holder, int position, @NonNull Room model) {
+                holder.bind(model);
+            }
+
+            @Override
+            public void onDataChanged() {
+                // If there are no chat messages, show a view that invites the user to add a message.
+                //mEmptyListMessage.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
+            }
+        };
     }
 }

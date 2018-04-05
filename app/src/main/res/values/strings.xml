@@ -5,8 +5,8 @@
     <string name="namespace">kokuva_vone</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
-    <string-array name="navigation_drawer_items_array">
-        <item>Sala</item>
-        <item>Sair</item>
-    </string-array>
+    <string name="signing_in">signing_in</string>
+    <string name="signed_in">signed_in</string>
+    <string name="anonymous_auth_failed_msg">anonymous_auth_failed_msg</string>
+
 </resources>

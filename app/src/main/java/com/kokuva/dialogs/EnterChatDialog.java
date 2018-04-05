@@ -20,7 +20,7 @@ import com.kokuva.adapter.ImageAdapter;
 import com.kokuva.model.Chat;
 
 /**
- * Created by Alexandre on 23/04/2017.
+ * Created by Alexandre on 23/04/2018
  */
 
 public class EnterChatDialog extends DialogFragment {
@@ -30,6 +30,16 @@ public class EnterChatDialog extends DialogFragment {
         public void onDialogNegativeClick(DialogFragment dialog);
     }
     NoticeDialogListener mListener;
+    private String idRoom;
+
+    public String getIdRoom() {
+        return idRoom;
+    }
+
+    public void setIdRoom(String idRoom) {
+        this.idRoom = idRoom;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
