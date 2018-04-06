@@ -7,45 +7,32 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.kokuva.dialogs.EnterChatDialog;
 import com.kokuva.firestore.FirestoreRecyclerAdapter;
 import com.kokuva.firestore.FirestoreRecyclerOptions;
 import com.kokuva.model.AbstractRoom;
-import com.kokuva.model.Chat;
 import com.kokuva.model.Room;
 import com.kokuva.model.RoomHolder;
 
-import java.util.HashMap;
-import java.util.Map;
 
-
-public class MainActivity extends BaseActivity implements EnterChatDialog.NoticeDialogListener, FirebaseAuth.AuthStateListener {
+public class ChatActivity extends BaseActivity implements EnterChatDialog.NoticeDialogListener, FirebaseAuth.AuthStateListener {
 
     private static int REQUEST_PERMISSIONS = 3;
     private static final CollectionReference sRoomsCollection =
             FirebaseFirestore.getInstance().collection("rooms");
     private static final Query sRoomQuery = sRoomsCollection.whereEqualTo("reserved", false);
 
-    static {
-        FirebaseFirestore.setLoggingEnabled(true);
-    }
 
     private RecyclerView mRecyclerView;
 
@@ -60,16 +47,6 @@ public class MainActivity extends BaseActivity implements EnterChatDialog.Notice
 
 
     private void addUserMac(String mac, String uuid){
-        final CollectionReference sUserCollection =
-                FirebaseFirestore.getInstance().collection("users");
-        Map map = new HashMap<String,String>();
-        map.put(uuid, mac);
-        sUserCollection.add(map).addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, "Failed to write user", e);
-            }
-        });
     }
 
     @Override
@@ -86,7 +63,7 @@ public class MainActivity extends BaseActivity implements EnterChatDialog.Notice
 
     private void getPermission(){
         Log.d(TAG, "GET_PERMISSIONS");
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]
+        ActivityCompat.requestPermissions(ChatActivity.this, new String[]
             {Manifest.permission.READ_PHONE_STATE,
                     Manifest.permission.READ_EXTERNAL_STORAGE,
                     Manifest.permission.ACCESS_WIFI_STATE},REQUEST_PERMISSIONS);
@@ -134,7 +111,6 @@ public class MainActivity extends BaseActivity implements EnterChatDialog.Notice
     public void onAuthStateChanged(@NonNull FirebaseAuth auth) {
 
         if (isSignedIn()) {
-            addUserMac(getMac(), auth.getCurrentUser().getUid());
             attachRecyclerViewAdapter();
         } else {
             Toast.makeText(this, R.string.signing_in, Toast.LENGTH_SHORT).show();
@@ -183,7 +159,7 @@ public class MainActivity extends BaseActivity implements EnterChatDialog.Notice
                     public void onClickListener(AbstractRoom room) {
                         Log.d("---------->","onclicklistener");
                         EnterChatDialog dialog = new EnterChatDialog();
-                        dialog.setListener(MainActivity.this,room);
+                        dialog.setListener(ChatActivity.this,room);
                         dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
                     }
                 });

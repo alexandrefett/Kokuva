@@ -4,6 +4,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:padding="16dp"
     tools:context="com.kokuva.MainActivity">
 
 
@@ -12,25 +13,30 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:paddingBottom="10dp"
         android:text="Digite seu apelido."
-        android:textSize="18sp" />
+        android:textSize="18sp"
+        android:typeface="normal" />
 
     <EditText
         android:id="@+id/editText"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:ems="10"
         android:inputType="textPersonName"
         android:maxLength="20"
-        android:textSize="18sp" />
+        android:textSize="18sp"
+        android:typeface="normal" />
 
     <CheckBox
         android:id="@+id/checkBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:checked="true"
+        android:paddingTop="10dp"
+        android:singleLine="true"
         android:text="Aceito os termos e condições"
-        android:textSize="18sp" />
+        android:typeface="normal"
+        android:visibility="visible" />
 </LinearLayout>

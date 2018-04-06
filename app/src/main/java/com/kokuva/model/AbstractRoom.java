@@ -3,6 +3,7 @@ package com.kokuva.model;
 public abstract class AbstractRoom {
 
     public abstract String getName();
+    public abstract String getUid();
 
     @Override
     public abstract int hashCode();
