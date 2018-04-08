@@ -4,8 +4,6 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import com.kokuva.R;
 
@@ -13,7 +11,7 @@ import com.kokuva.R;
  * Created by Alexandre on 01/05/2017.
  */
 
-public class ReceiverMsgView extends MessageView {
+public class ReceiverMsgView extends ChatView {
     public ReceiverMsgView(Context context) {
         super(context);
         setGravity(Gravity.LEFT);

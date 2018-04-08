@@ -7,6 +7,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -19,6 +20,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.kokuva.dialogs.EnterChatDialog;
+import com.kokuva.dialogs.ExitChatDialog;
 import com.kokuva.firestore.FirestoreRecyclerAdapter;
 import com.kokuva.firestore.FirestoreRecyclerOptions;
 import com.kokuva.model.AbstractRoom;
@@ -26,14 +28,9 @@ import com.kokuva.model.Room;
 import com.kokuva.model.RoomHolder;
 
 
-public class ChatActivity extends BaseActivity implements EnterChatDialog.NoticeDialogListener, FirebaseAuth.AuthStateListener {
+public class ChatActivity extends BaseActivity implements ExitChatDialog.NoticeDialogListener, FirebaseAuth.AuthStateListener {
 
-    private static int REQUEST_PERMISSIONS = 3;
-    private static final CollectionReference sRoomsCollection =
-            FirebaseFirestore.getInstance().collection("rooms");
-    private static final Query sRoomQuery = sRoomsCollection.whereEqualTo("reserved", false);
-
-
+    private DrawerLayout mDrawerLayout;
     private RecyclerView mRecyclerView;
 
     @Override
@@ -45,41 +42,9 @@ public class ChatActivity extends BaseActivity implements EnterChatDialog.Notice
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
-
-    private void addUserMac(String mac, String uuid){
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_PERMISSIONS) {
-            if (grantResults.length >= 1){
-                for(int p:grantResults){
-                    Log.d(TAG, "Permission: "+p);
-                }
-            }
-        }
-    }
-
-    private void getPermission(){
-        Log.d(TAG, "GET_PERMISSIONS");
-        ActivityCompat.requestPermissions(ChatActivity.this, new String[]
-            {Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.ACCESS_WIFI_STATE},REQUEST_PERMISSIONS);
-    }
-
-    private String getMac(){
-        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        WifiInfo wInfo = wifiManager.getConnectionInfo();
-        return wInfo.getMacAddress();
-    }
-
     @Override
     public void onStart() {
         super.onStart();
-        if (isSignedIn()) { attachRecyclerViewAdapter(); }
-        FirebaseAuth.getInstance().addAuthStateListener(this);
         Log.d(TAG,"----Main Activity: OnStart");
     }
     @Override
@@ -97,7 +62,6 @@ public class ChatActivity extends BaseActivity implements EnterChatDialog.Notice
     @Override
     public void onStop(){
         super.onStop();
-        FirebaseAuth.getInstance().removeAuthStateListener(this);
         Log.d(TAG,"----Main Activity: OnStop");
 
     }

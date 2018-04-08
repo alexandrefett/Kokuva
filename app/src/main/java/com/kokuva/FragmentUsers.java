@@ -8,14 +8,15 @@ import android.view.ViewGroup;
 
 public class FragmentUsers extends BaseFragment {
     private static FragmentUsers ourInstance;
-    private RecyclerView chats_list;
+    private String roomId;
+    private RecyclerView users;
 
     public static FragmentUsers getInstance(String value) {
         if (ourInstance == null) {
             ourInstance = new FragmentUsers();
             if (value != null) {
                 Bundle args = new Bundle();
-                args.putString("value", value);
+                args.putString("roomId", value);
                 ourInstance.setArguments(args);
             }
         }
@@ -27,7 +28,7 @@ public class FragmentUsers extends BaseFragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         if(args!=null) {
-            //userToId = args.getString("userToId", "");
+            roomId = args.getString("RoomId", "");
         }
     }
 
