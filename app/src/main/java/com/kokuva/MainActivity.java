@@ -2,6 +2,7 @@ package com.kokuva;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -35,10 +36,13 @@ import com.kokuva.model.RoomHolder;
 import java.util.HashMap;
 import java.util.Map;
 
+import static android.provider.AlarmClock.EXTRA_MESSAGE;
+
 
 public class MainActivity extends BaseActivity implements EnterChatDialog.NoticeDialogListener, FirebaseAuth.AuthStateListener {
 
     private static int REQUEST_PERMISSIONS = 3;
+    private static int RESULT = 0;
     private static final CollectionReference sRoomsCollection =
             FirebaseFirestore.getInstance().collection("rooms");
     private static final Query sRoomQuery = sRoomsCollection.whereEqualTo("reserved", false);
@@ -126,13 +130,18 @@ public class MainActivity extends BaseActivity implements EnterChatDialog.Notice
     }
 
     @Override
-    public void onDialogPositiveClick(AbstractRoom room) {
+    public void onDialogPositiveClick(AbstractRoom room, String nickname) {
         Toast.makeText(this, room.getName(),Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra("id", room.getId());
+        intent.putExtra("nickname", nickname);
+        startActivityForResult(intent, RESULT);
     }
+
+
 
     @Override
     public void onAuthStateChanged(@NonNull FirebaseAuth auth) {
-
         if (isSignedIn()) {
             addUserMac(getMac(), auth.getCurrentUser().getUid());
             attachRecyclerViewAdapter();

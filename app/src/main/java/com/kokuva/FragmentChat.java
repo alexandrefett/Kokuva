@@ -1,6 +1,8 @@
 package com.kokuva;
 
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,9 +15,9 @@ import com.google.firebase.firestore.Query;
 public class FragmentChat extends BaseFragment {
 
     private String roomId;
-    private static int REQUEST_PERMISSIONS = 3;
 
     private static FragmentChat ourInstance;
+    private RecyclerView recycler;
 
     public static FragmentChat getInstance() {
         if (ourInstance == null) {
@@ -42,6 +44,8 @@ public class FragmentChat extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.fragment_chat, container, false);
+        recycler = (RecyclerView) view.findViewById(R.id.users);
+        recycler.setLayoutManager(new LinearLayoutManager(getContext()));
         return view;
     }
 

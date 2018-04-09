@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.kokuva.R;
@@ -23,11 +24,11 @@ import com.kokuva.model.Room;
 public class EnterChatDialog extends DialogFragment {
 
     public interface NoticeDialogListener {
-        void onDialogPositiveClick(AbstractRoom room);
+        void onDialogPositiveClick(AbstractRoom room, String nickname);
     }
     private Activity a;
     NoticeDialogListener mListener;
-    private AbstractRoom room;
+    AbstractRoom room;
 
     public void setListener(NoticeDialogListener listener, AbstractRoom room){
         this.mListener = listener;
@@ -40,13 +41,17 @@ public class EnterChatDialog extends DialogFragment {
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.enterchat_layout, null);
+
+        final EditText nick = (EditText)dialogView.findViewById(R.id.editText);
+
         Log.d("---------->","view dialog");
         builder.setView(dialogView)
             .setPositiveButton("Entrar", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     Log.d("---------->","onclick");
-                    mListener.onDialogPositiveClick(room);
+                    mListener.onDialogPositiveClick(room, nick.getText().toString());
+                    dismiss();
                 }
             });
         builder.setNegativeButton("Voltar", new DialogInterface.OnClickListener() {

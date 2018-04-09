@@ -1,46 +1,115 @@
 package com.kokuva;
 
-import android.Manifest;
-import android.content.Context;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
 import android.widget.Toast;
-
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
-import com.kokuva.dialogs.EnterChatDialog;
+import com.google.firebase.firestore.Transaction;
 import com.kokuva.dialogs.ExitChatDialog;
-import com.kokuva.firestore.FirestoreRecyclerAdapter;
-import com.kokuva.firestore.FirestoreRecyclerOptions;
 import com.kokuva.model.AbstractRoom;
-import com.kokuva.model.Room;
-import com.kokuva.model.RoomHolder;
+import java.util.Hashtable;
+import java.util.Map;
 
 
-public class ChatActivity extends BaseActivity implements ExitChatDialog.NoticeDialogListener, FirebaseAuth.AuthStateListener {
+public class ChatActivity extends BaseActivity implements ExitChatDialog.NoticeDialogListener {
 
     private DrawerLayout mDrawerLayout;
-    private RecyclerView mRecyclerView;
+    private static final String TAG = "---------ChatActivity";
+
+    private String id="";
+    private String nickname;
+
+    private CollectionReference sUserCollection;
+    private Query sUserQuery;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_chat);
 
-        setContentView(R.layout.activity_main);
-        mRecyclerView = (RecyclerView)findViewById(R.id.rooms);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        Bundle extras = getIntent().getExtras();
+
+        if (extras != null) {
+            id = extras.getString("id","");
+            nickname = extras.getString("nickname");
+
+            Log.d(TAG, "id:"+id);
+            Log.d(TAG, "nickname: "+nickname);
+
+            sUserCollection = FirebaseFirestore.getInstance().collection("users");
+            sUserQuery = sUserCollection.orderBy("name");
+
+            enterChat(id);
+        }
     }
+
+    public void enterChat(String roomid){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        final DocumentReference sfDocRef = db.collection("rooms").document(roomid);
+
+        db.runTransaction(new Transaction.Function<Double>() {
+            @Override
+            public Double apply(Transaction transaction) throws FirebaseFirestoreException {
+
+                DocumentSnapshot snapshot = transaction.get(sfDocRef);
+                double participants = snapshot.getDouble("participants") + 1;
+                if (participants < 50) {
+                    transaction.update(sfDocRef, "participants", participants);
+                    onAddUser(nickname, getUid());
+                    return participants;
+                } else {
+                    throw new FirebaseFirestoreException("Population too high",
+                            FirebaseFirestoreException.Code.ABORTED);
+                }
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Double>() {
+            @Override
+            public void onSuccess(Double result) {
+                Log.d(TAG, "Transaction success: " + result);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG, "Transaction failure.", e);
+            }
+        });
+    }
+
+    public void exitChat(String roomid){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        final DocumentReference sfDocRef = db.document("rooms/"+roomid);
+
+        db.runTransaction(new Transaction.Function<Void>() {
+            @Override
+            public Void apply(Transaction transaction) throws FirebaseFirestoreException {
+                DocumentSnapshot snapshot = transaction.get(sfDocRef);
+                double participants = snapshot.getDouble("participants") - 1;
+                return null;
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "Transaction success!");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG, "Transaction failure.", e);
+            }
+        });
+    }
+
 
     @Override
     public void onStart() {
@@ -71,69 +140,27 @@ public class ChatActivity extends BaseActivity implements ExitChatDialog.NoticeD
         Toast.makeText(this, room.getName(),Toast.LENGTH_LONG).show();
     }
 
-    @Override
-    public void onAuthStateChanged(@NonNull FirebaseAuth auth) {
-
-        if (isSignedIn()) {
-            attachRecyclerViewAdapter();
-        } else {
-            Toast.makeText(this, R.string.signing_in, Toast.LENGTH_SHORT).show();
-            auth.signInAnonymously().addOnCompleteListener(new SignInResultNotifier(this));
-        }
+    private String getUid() {
+        return FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
 
-    private boolean isSignedIn() {
-        return FirebaseAuth.getInstance().getCurrentUser() != null;
-    }
-
-    private void attachRecyclerViewAdapter() {
-        final RecyclerView.Adapter adapter = newAdapter();
-
-        // Scroll to bottom on new messages
-        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+    protected void onAddUser(String nickname, String uid) {
+        Map<String,String> map = new Hashtable<String,String>();
+        map.put("nickname",nickname);
+        sUserCollection.document(uid).set(map).addOnFailureListener(this, new OnFailureListener() {
             @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                mRecyclerView.smoothScrollToPosition(adapter.getItemCount());
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, "Failed to write message", e);
             }
         });
-
-        mRecyclerView.setAdapter(adapter);
     }
 
-    protected RecyclerView.Adapter newAdapter() {
-        FirestoreRecyclerOptions<Room> options =
-                new FirestoreRecyclerOptions.Builder<Room>()
-                        .setQuery(sRoomQuery, Room.class)
-                        .setLifecycleOwner(this)
-                        .build();
-
-        return new FirestoreRecyclerAdapter<Room, RoomHolder>(options) {
-
-
+    protected void onExitUser(String uid) {
+        sUserCollection.document(uid).delete().addOnFailureListener(this, new OnFailureListener() {
             @Override
-            public RoomHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                return new RoomHolder(LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_room, parent, false));
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, "Failed to write message", e);
             }
-
-            @Override
-            protected void onBindViewHolder(@NonNull RoomHolder holder, int position, @NonNull final Room model) {
-                holder.bind(model, new RoomHolder.OnClickListener() {
-                    @Override
-                    public void onClickListener(AbstractRoom room) {
-                        Log.d("---------->","onclicklistener");
-                        EnterChatDialog dialog = new EnterChatDialog();
-                        dialog.setListener(ChatActivity.this,room);
-                        dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
-                    }
-                });
-            }
-
-            @Override
-            public void onDataChanged() {
-                // If there are no chat messages, show a view that invites the user to add a message.
-                //mEmptyListMessage.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
-            }
-        };
+        });
     }
 }

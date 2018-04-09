@@ -2,14 +2,14 @@ package com.kokuva.model;
 
 public class Room extends AbstractRoom {
     private String name;
-    private String uid;
+    private String id;
     private boolean reserved;
 
     public Room() {
     }
-    public Room(String name, boolean reserved, String uid) {
+    public Room(String name, boolean reserved, String id) {
         this.name = name;
-        this.uid = uid;
+        this.id = id;
         this.reserved = reserved;
     }
 
@@ -39,11 +39,11 @@ public class Room extends AbstractRoom {
         this.reserved = reserved;
     }
 
-    public String getUid() {
-        return uid;
+    public String getId() {
+        return id;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
+    public void setId(String id) {
+        this.id = id;
     }
 }
