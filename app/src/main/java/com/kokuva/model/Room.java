@@ -1,16 +1,15 @@
 package com.kokuva.model;
 
+
 public class Room extends AbstractRoom {
     private String name;
     private String id;
-    private boolean reserved;
 
     public Room() {
     }
-    public Room(String name, boolean reserved, String id) {
+    public Room(String name, String id) {
         this.name = name;
         this.id = id;
-        this.reserved = reserved;
     }
 
     public String getName() {
@@ -29,14 +28,6 @@ public class Room extends AbstractRoom {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public boolean isReserved() {
-        return reserved;
-    }
-
-    public void setReserved(boolean reserved) {
-        this.reserved = reserved;
     }
 
     public String getId() {

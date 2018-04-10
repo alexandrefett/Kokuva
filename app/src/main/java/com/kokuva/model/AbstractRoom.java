@@ -1,5 +1,7 @@
 package com.kokuva.model;
 
+import java.util.Map;
+
 public abstract class AbstractRoom {
 
     public abstract String getName();

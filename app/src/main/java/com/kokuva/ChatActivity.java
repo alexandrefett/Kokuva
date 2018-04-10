@@ -66,7 +66,7 @@ public class ChatActivity extends BaseActivity implements ExitChatDialog.NoticeD
                 double participants = snapshot.getDouble("participants") + 1;
                 if (participants < 50) {
                     transaction.update(sfDocRef, "participants", participants);
-                    onAddUser(nickname, getUid());
+                    onAddUser(nickname, getUid(), id);
                     return participants;
                 } else {
                     throw new FirebaseFirestoreException("Population too high",
@@ -144,10 +144,13 @@ public class ChatActivity extends BaseActivity implements ExitChatDialog.NoticeD
         return FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
 
-    protected void onAddUser(String nickname, String uid) {
+    protected void onAddUser(String nickname, String uid, String id) {
+        CollectionReference sUserCollection = FirebaseFirestore.getInstance()
+                .collection("users");
+
         Map<String,String> map = new Hashtable<String,String>();
-        map.put("nickname",nickname);
-        sUserCollection.document(uid).set(map).addOnFailureListener(this, new OnFailureListener() {
+        map.put(nickname, uid);
+        sUserCollection.document(id).set(map).addOnFailureListener(this, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.e(TAG, "Failed to write message", e);
@@ -155,8 +158,8 @@ public class ChatActivity extends BaseActivity implements ExitChatDialog.NoticeD
         });
     }
 
-    protected void onExitUser(String uid) {
-        sUserCollection.document(uid).delete().addOnFailureListener(this, new OnFailureListener() {
+    protected void onExitUser(String nickname) {
+        sUserCollection.document(nickname).delete().addOnFailureListener(this, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.e(TAG, "Failed to write message", e);
